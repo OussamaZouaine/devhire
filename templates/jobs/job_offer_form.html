@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">{{ form_title }}</h1>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+        <p class="mt-3">
+            <a href="{% url 'jobs:recruiter_dashboard' %}">← Retour à mes offres</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Mes offres{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+    <h1 class="h3 mb-0">Mes offres d'emploi</h1>
+    <a href="{% url 'jobs:job_offer_create' %}" class="btn btn-primary">
+        + Publier une offre
+    </a>
+</div>
+
+{% if job_offers %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Localisation</th>
+                    <th>Type</th>
+                    <th>Candidatures</th>
+                    <th>Statut</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in job_offers %}
+                    <tr>
+                        <td class="fw-medium">{{ offer.title }}</td>
+                        <td>{{ offer.location }}</td>
+                        <td>{{ offer.get_contract_type_display }}</td>
+                        <td>
+                            <a
+                                href="{% url 'applications:job_applications_list' offer.pk %}"
+                                class="badge bg-primary rounded-pill text-decoration-none"
+                            >
+                                {{ offer.application_count }} candidature{{ offer.application_count|pluralize }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if offer.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex gap-1 justify-content-end flex-wrap">
+                                <a
+                                    href="{% url 'applications:job_applications_list' offer.pk %}"
+                                    class="btn btn-sm btn-outline-secondary"
+                                >
+                                    Candidatures
+                                </a>
+                                <a
+                                    href="{% url 'jobs:job_offer_update' offer.pk %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Modifier
+                                </a>
+                                <form
+                                    method="post"
+                                    action="{% url 'jobs:job_offer_toggle_active' offer.pk %}"
+                                    class="d-inline"
+                                >
+                                    {% csrf_token %}
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm {% if offer.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                    >
+                                        {% if offer.is_active %}Désactiver{% else %}Activer{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Vous n'avez pas encore publié d'offre d'emploi.
+        <a href="{% url 'jobs:job_offer_create' %}" class="alert-link">Publier votre première offre</a>.
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Mes candidatures{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+    <h1 class="h3 mb-0">Mes candidatures</h1>
+    <a href="{% url 'accounts:candidate_profile_update' %}" class="btn btn-outline-primary">
+        Mon profil / CV
+    </a>
+</div>
+
+{% if applications %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Offre</th>
+                    <th>Entreprise</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'jobs:job_offer_detail' application.job_offer.pk %}">
+                                {{ application.job_offer.title }}
+                            </a>
+                        </td>
+                        <td>{{ application.job_offer.recruiter.company_name }}</td>
+                        <td>{{ application.applied_at|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if application.status == "pending" %}
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            {% elif application.status == "accepted" %}
+                                <span class="badge bg-success">Acceptée</span>
+                            {% else %}
+                                <span class="badge bg-danger">Refusée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Vous n'avez pas encore postulé à une offre.
+        <a href="{% url 'core:home' %}" class="alert-link">Parcourir les offres</a>.
+    </div>
+{% endif %}
+{% endblock %}

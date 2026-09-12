@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# Django
+*.sqlite3
+db.sqlite3
+staticfiles/
+
+# Uploaded media (CVs, logos) — never commit user files
+media/*
+!media/.gitkeep
+
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local plan doc (remove this line to include in the repo)
+DevHire_Plan_Django.md

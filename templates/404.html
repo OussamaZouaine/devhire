@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Page introuvable{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <p class="display-1 text-muted fw-bold">404</p>
+    <h1 class="h3 mb-3">Page introuvable</h1>
+    <p class="text-muted col-md-6 mx-auto">
+        La page que vous recherchez n'existe pas ou a été déplacée.
+    </p>
+    <a href="{% url 'core:home' %}" class="btn btn-primary mt-3">Retour à l'accueil</a>
+</div>
+{% endblock %}

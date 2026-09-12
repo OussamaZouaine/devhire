@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job_offer.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item active">{{ job_offer.title }}</li>
+            </ol>
+        </nav>
+
+        <h1 class="h2 mb-2">{{ job_offer.title }}</h1>
+
+        {% if not job_offer.is_active %}
+            <div class="alert alert-secondary">
+                Cette offre n'est plus active.
+                {% if has_applied %}
+                    Vous avez postulé avant sa désactivation.
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <p class="text-muted mb-4">
+            <strong>{{ job_offer.recruiter.company_name }}</strong>
+            · {{ job_offer.location }}
+            · {{ job_offer.get_contract_type_display }}
+        </p>
+
+        {% if job_offer.salary_min or job_offer.salary_max %}
+            <p class="mb-3">
+                <span class="badge bg-light text-dark border">
+                    Salaire :
+                    {% if job_offer.salary_min %}{{ job_offer.salary_min }} €{% endif %}
+                    {% if job_offer.salary_min and job_offer.salary_max %} — {% endif %}
+                    {% if job_offer.salary_max %}{{ job_offer.salary_max }} €{% endif %}
+                </span>
+            </p>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 card-title">Description</h2>
+                <p class="card-text">{{ job_offer.description|linebreaks }}</p>
+            </div>
+        </div>
+
+        {% if job_offer.keywords %}
+            <p>
+                <strong>Mots-clés :</strong>
+                <span class="text-muted">{{ job_offer.keywords }}</span>
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card sticky-top" style="top: 1rem;">
+            <div class="card-body">
+                <h2 class="h5 card-title">Postuler</h2>
+
+                {% if user.is_authenticated %}
+                    {% if user.role == "candidate" %}
+                        {% if has_applied %}
+                            <div class="alert alert-info mb-0">
+                                Vous avez déjà postulé à cette offre.
+                                <a href="{% url 'core:candidate_dashboard' %}">Voir mes candidatures</a>
+                            </div>
+                        {% elif missing_cv %}
+                            <div class="alert alert-warning mb-3">
+                                Téléversez votre CV pour postuler.
+                            </div>
+                            <a
+                                href="{% url 'accounts:candidate_profile_update' %}"
+                                class="btn btn-primary w-100"
+                            >
+                                Compléter mon profil
+                            </a>
+                        {% else %}
+                            <a
+                                href="{% url 'applications:apply_to_job' job_offer.pk %}"
+                                class="btn btn-primary w-100"
+                            >
+                                Postuler rapidement
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Connectez-vous avec un compte candidat pour postuler.
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Connectez-vous pour postuler à cette offre.</p>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 mb-2">
+                        Se connecter
+                    </a>
+                    <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-outline-primary w-100">
+                        Créer un compte candidat
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

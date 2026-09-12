@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">Mon profil candidat</h1>
+        <p class="text-muted">
+            Complétez votre profil et téléversez votre CV (PDF) pour pouvoir postuler aux offres.
+        </p>
+
+        {% if object.cv %}
+            <div class="alert alert-success">
+                CV actuel enregistré : {{ object.cv.name|cut:"cvs/user_" }}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% crispy form %}
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
