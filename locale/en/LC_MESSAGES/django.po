@@ -1,0 +1,1136 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DevHire\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "%(a)s / %(v)s vues"
+msgstr "%(a)s / %(v)s views"
+
+msgid "%(counter)s alerte emploi active"
+msgid_plural "%(counter)s alertes emploi actives"
+msgstr[0] "%(counter)s active job alert"
+msgstr[1] "%(counter)s active job alerts"
+
+msgid "%(counter)s candidat a déjà passé le test."
+msgid_plural "%(counter)s candidats ont déjà passé le test."
+msgstr[0] "%(counter)s candidate has already taken the test."
+msgstr[1] "%(counter)s candidates have already taken the test."
+
+msgid "%(counter)s candidature"
+msgid_plural "%(counter)s candidatures"
+msgstr[0] "%(counter)s application"
+msgstr[1] "%(counter)s applications"
+
+msgid "%(counter)s message non lu"
+msgid_plural "%(counter)s messages non lus"
+msgstr[0] "%(counter)s unread message"
+msgstr[1] "%(counter)s unread messages"
+
+msgid "%(counter)s offre"
+msgid_plural "%(counter)s offres"
+msgstr[0] "%(counter)s job"
+msgstr[1] "%(counter)s jobs"
+
+msgid "%(counter)s offre ouverte"
+msgid_plural "%(counter)s offres ouvertes"
+msgstr[0] "%(counter)s open job"
+msgstr[1] "%(counter)s open jobs"
+
+msgid "%(counter)s offre trouvée"
+msgid_plural "%(counter)s offres trouvées"
+msgstr[0] "%(counter)s job found"
+msgstr[1] "%(counter)s jobs found"
+
+msgid "%(counter)s question à choix multiple"
+msgid_plural "%(counter)s questions à choix multiple"
+msgstr[0] "%(counter)s multiple-choice question"
+msgstr[1] "%(counter)s multiple-choice questions"
+
+msgid "%(h)s embauche(s)"
+msgstr "%(h)s hire(s)"
+
+msgid "%(period)s jours"
+msgstr "%(period)s days"
+
+msgid "A postulé chez vous"
+msgstr "Applied to your company"
+
+msgid "Accueil"
+msgstr "Home"
+
+msgid "Actif"
+msgstr "Active"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Activer"
+msgstr "Activate"
+
+msgid "Administration"
+msgstr "Administration"
+
+msgid "Ajouter"
+msgstr "Add"
+
+msgid "Ajouter aux favoris"
+msgstr "Save job"
+
+msgid "Ajouter la note"
+msgstr "Add note"
+
+msgid "Ajouter une question"
+msgstr "Add a question"
+
+msgid "Ajouter à mes compétences"
+msgstr "Add to my skills"
+
+msgid "Ajouter à mon agenda (.ics)"
+msgstr "Add to my calendar (.ics)"
+
+msgid ""
+"Ajoutez des compétences à votre profil pour recevoir des recommandations "
+"personnalisées."
+msgstr "Add skills to your profile to get personalised recommendations."
+
+msgid "Ajoutée le"
+msgstr "Saved on"
+
+msgid "Alerte emploi"
+msgstr "Job alert"
+
+msgid "Alertes"
+msgstr "Alerts"
+
+msgid "Alertes emploi et suivi en temps réel"
+msgstr "Job alerts and live tracking"
+
+msgid "Analyse automatique de votre CV"
+msgstr "Automatic CV analysis"
+
+msgid "Annuler"
+msgstr "Cancel"
+
+msgid "Aucun message. Démarrez la conversation !"
+msgstr "No messages yet. Start the conversation!"
+
+msgid "Aucune alerte pour le moment."
+msgstr "No alerts yet."
+
+msgid "Aucune compétence renseignée."
+msgstr "No skills listed."
+
+msgid ""
+"Aucune conversation. Vous pouvez écrire au recruteur ou au candidat depuis "
+"la page d'une candidature."
+msgstr ""
+"No conversations. You can message the recruiter or the candidate from an "
+"application page."
+
+msgid "Aucune entreprise inscrite pour le moment."
+msgstr "No companies registered yet."
+
+msgid "Aucune note pour le moment."
+msgstr "No notes yet."
+
+msgid "Aucune notification."
+msgstr "No notifications."
+
+msgid "Aucune offre ne correspond à votre recherche."
+msgstr "No jobs match your search."
+
+msgid "Aucune offre."
+msgstr "No jobs."
+
+msgid ""
+"Aucune question pour le moment : le test ne sera pas proposé aux candidats."
+msgstr "No questions yet: the test will not be offered to candidates."
+
+msgid "Bon retour !"
+msgstr "Welcome back!"
+
+msgid "Bonjour"
+msgstr "Hello"
+
+msgid "Bonjour %(name)s"
+msgstr "Hello %(name)s"
+
+msgid "CV actuel enregistré"
+msgstr "Current CV on file"
+
+msgid "Candidat"
+msgstr "Candidate"
+
+msgid "Candidats"
+msgstr "Candidates"
+
+msgid "Candidats / offre"
+msgstr "Candidates / job"
+
+msgid "Candidats classés par compatibilité"
+msgstr "Candidates ranked by match"
+
+msgid "Candidats disponibles par offre"
+msgstr "Available candidates per job"
+
+msgid "Candidats inscrits"
+msgstr "Registered candidates"
+
+msgid "Candidatures"
+msgstr "Applications"
+
+msgid "Candidatures (Kanban)"
+msgstr "Applications (Kanban)"
+
+msgid "Candidatures → embauches"
+msgstr "Applications → hires"
+
+msgid "Ce lien de réinitialisation est invalide ou a déjà été utilisé."
+msgstr "This reset link is invalid or has already been used."
+
+msgid ""
+"Ce test chronométré (%(minutes)s minutes) fait partie du processus de "
+"recrutement."
+msgstr "This timed test (%(minutes)s minutes) is part of the hiring process."
+
+msgid ""
+"Ces informations sont visibles par les recruteurs et améliorent votre score "
+"de compatibilité. Laissez une ligne vide pour l'ignorer."
+msgstr ""
+"Recruiters can see this information and it improves your match score. Leave "
+"a row empty to skip it."
+
+msgid "Cette entreprise n'a pas d'offre ouverte pour le moment."
+msgstr "This company has no open jobs at the moment."
+
+msgid ""
+"Cette offre comporte un test technique (QCM chronométré) à passer après "
+"l'envoi."
+msgstr ""
+"This job includes a technical test (timed quiz) to take after applying."
+
+msgid "Cette offre n'est plus active."
+msgstr "This job is no longer active."
+
+msgid "Changer de mot de passe"
+msgstr "Change password"
+
+msgid "Changer l'étape"
+msgstr "Change stage"
+
+msgid ""
+"Chaque jour, les nouvelles offres correspondant à vos alertes vous sont "
+"envoyées par email et en notification."
+msgstr ""
+"Every day, new jobs matching your alerts are sent to you by email and as "
+"notifications."
+
+msgid "Chercher des offres"
+msgstr "Find jobs"
+
+msgid "Choisissez votre profil pour commencer."
+msgstr "Choose your profile to get started."
+
+msgid "Clôturée"
+msgstr "Closed"
+
+msgid "Commencer le test"
+msgstr "Start the test"
+
+msgid "Commentaire (optionnel)"
+msgstr "Comment (optional)"
+
+msgid "Compatibilité"
+msgstr "Match"
+
+msgid "Compatibilité avec l'offre"
+msgstr "Match with the job"
+
+msgid "Compatibilité moy."
+msgstr "Avg. match"
+
+msgid "Compatibilité moy. %(m)s %%"
+msgstr "Avg. match %(m)s %%"
+
+msgid "Compléter mon profil"
+msgstr "Complete my profile"
+
+msgid "Compétence"
+msgstr "Skill"
+
+msgid "Compétences"
+msgstr "Skills"
+
+msgid "Compétences détectées dans votre CV"
+msgstr "Skills found in your CV"
+
+msgid "Compétences les plus demandées"
+msgstr "Most in-demand skills"
+
+msgid "Compétences manquantes"
+msgstr "Missing skills"
+
+msgid "Compétences requises"
+msgstr "Required skills"
+
+msgid "Connectez-vous"
+msgstr "Log in"
+
+msgid "Connectez-vous avec un compte candidat pour postuler."
+msgstr "Log in with a candidate account to apply."
+
+msgid "Connectez-vous pour postuler à cette offre."
+msgstr "Log in to apply for this job."
+
+msgid "Connectez-vous à votre espace DevHire."
+msgstr "Log in to your DevHire space."
+
+msgid "Connexion"
+msgstr "Log in"
+
+msgid "Contacter le recruteur"
+msgstr "Contact the recruiter"
+
+msgid "Continuer avec Google"
+msgstr "Continue with Google"
+
+msgid "Contrat"
+msgstr "Contract"
+
+msgid "Conversation"
+msgstr "Conversation"
+
+msgid "Conversion"
+msgstr "Conversion"
+
+msgid "Critères"
+msgstr "Criteria"
+
+msgid "Créer un compte"
+msgstr "Create an account"
+
+msgid "Créer un compte candidat"
+msgstr "Create a candidate account"
+
+msgid "Créer une alerte pour cette recherche"
+msgstr "Create an alert for this search"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Date limite"
+msgstr "Deadline"
+
+msgid "Demander un nouveau lien"
+msgstr "Request a new link"
+
+msgid "Dernier envoi"
+msgstr "Last sent"
+
+msgid "Description"
+msgstr "Description"
+
+msgid ""
+"Durée : %(minutes)s minutes — le chronomètre démarre dès que vous commencez."
+msgstr ""
+"Duration: %(minutes)s minutes — the timer starts as soon as you begin."
+
+msgid "Déconnexion"
+msgstr "Log out"
+
+msgid "Délai moyen de 1re réponse"
+msgstr "Avg. time to first response"
+
+msgid "Désactiver"
+msgstr "Deactivate"
+
+msgid "Développeurs"
+msgstr "Developers"
+
+msgid "Email envoyé"
+msgstr "Email sent"
+
+msgid "Embauches"
+msgstr "Hires"
+
+msgid "En cours"
+msgstr "In progress"
+
+msgid "En pause"
+msgstr "Paused"
+
+msgid "Enregistrer"
+msgstr "Save"
+
+msgid "Enregistrer mon parcours"
+msgstr "Save my background"
+
+msgid "Entonnoir de recrutement"
+msgstr "Hiring funnel"
+
+msgid "Entreprise"
+msgstr "Company"
+
+msgid "Entreprises"
+msgstr "Companies"
+
+msgid "Entreprises qui recrutent"
+msgstr "Companies hiring"
+
+msgid "Entretiens"
+msgstr "Interviews"
+
+msgid "Entretiens à venir"
+msgstr "Upcoming interviews"
+
+msgid "Envoyer"
+msgstr "Send"
+
+msgid "Envoyer l'invitation"
+msgstr "Send invitation"
+
+msgid "Envoyer le lien"
+msgstr "Send the link"
+
+msgid "Envoyée le"
+msgstr "Sent on"
+
+msgid "Expirée"
+msgstr "Expired"
+
+msgid "Expérience"
+msgstr "Experience"
+
+msgid "Expériences"
+msgstr "Experience"
+
+msgid "Expériences professionnelles"
+msgstr "Work experience"
+
+msgid "Favoris"
+msgstr "Saved"
+
+msgid "Fermer"
+msgstr "Close"
+
+msgid "Fiche entreprise"
+msgstr "Company profile"
+
+msgid "Filtres avancés"
+msgstr "Advanced filters"
+
+msgid "Formation"
+msgstr "Education"
+
+msgid ""
+"Glissez-déposez une carte pour changer l'étape : le candidat est notifié "
+"automatiquement. Les candidats sont triés par score de compatibilité."
+msgstr ""
+"Drag and drop a card to change its stage: the candidate is notified "
+"automatically. Candidates are sorted by match score."
+
+msgid "Gérer"
+msgstr "Manage"
+
+msgid "Gérer l'offre"
+msgstr "Manage job"
+
+msgid "Historique"
+msgstr "History"
+
+msgid "Hors délai"
+msgstr "Late"
+
+msgid "Inactif"
+msgstr "Inactive"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid ""
+"Indiquez votre adresse email : vous recevrez un lien pour choisir un nouveau"
+" mot de passe."
+msgstr ""
+"Enter your email address: you will receive a link to choose a new password."
+
+msgid "Inscription"
+msgstr "Sign up"
+
+msgid "Inscription Candidat"
+msgstr "Candidate sign-up"
+
+msgid "Inscription Recruteur"
+msgstr "Recruiter sign-up"
+
+msgid "Inscription — Candidat"
+msgstr "Sign up — Candidate"
+
+msgid "Inscription — Recruteur"
+msgstr "Sign up — Recruiter"
+
+msgid "Invitations en attente"
+msgstr "Pending invitations"
+
+msgid "Inviter un recruteur"
+msgstr "Invite a recruiter"
+
+msgid "Je suis Candidat"
+msgstr "I'm a candidate"
+
+msgid "Je suis Recruteur"
+msgstr "I'm a recruiter"
+
+msgid "Jusqu'au"
+msgstr "Until"
+
+msgid "Kanban"
+msgstr "Kanban"
+
+msgid "La connexion Google crée un compte candidat."
+msgstr "Signing in with Google creates a candidate account."
+
+msgid "La date limite de candidature est dépassée."
+msgstr "The application deadline has passed."
+
+msgid ""
+"La plateforme de recrutement qui rapproche les talents tech et les "
+"entreprises grâce au matching intelligent."
+msgstr ""
+"The recruitment platform that brings tech talent and companies together "
+"through smart matching."
+
+msgid "Langue"
+msgstr "Language"
+
+msgid "Langues"
+msgstr "Languages"
+
+msgid "Le lien d'invitation est valable 7 jours."
+msgstr "The invitation link is valid for 7 days."
+
+msgid "Le pourcentage indique votre compatibilité avec chaque offre."
+msgstr "The percentage shows how well you match each job."
+
+msgid ""
+"Les candidats passent ce test chronométré après avoir postulé. Le score est "
+"calculé automatiquement."
+msgstr ""
+"Candidates take this timed test after applying. The score is calculated "
+"automatically."
+
+msgid ""
+"Les coordonnées et le CV ne sont visibles que lorsque le candidat postule à "
+"l'une de vos offres."
+msgstr ""
+"Contact details and the CV are only visible once the candidate applies to "
+"one of your jobs."
+
+msgid "Lettre de motivation"
+msgstr "Cover letter"
+
+msgid "Localisation"
+msgstr "Location"
+
+msgid "Ma candidature"
+msgstr "My application"
+
+msgid "Ma lettre de motivation"
+msgstr "My cover letter"
+
+msgid "Matching intelligent candidat ↔ offre"
+msgstr "Smart candidate ↔ job matching"
+
+msgid "Membres"
+msgstr "Members"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Mes alertes"
+msgstr "My alerts"
+
+msgid "Mes alertes emploi"
+msgstr "My job alerts"
+
+msgid "Mes candidatures"
+msgstr "My applications"
+
+msgid "Mes favoris"
+msgstr "Saved jobs"
+
+msgid "Mes offres"
+msgstr "My jobs"
+
+msgid "Mes offres favorites"
+msgstr "My saved jobs"
+
+msgid "Messagerie"
+msgstr "Inbox"
+
+msgid "Messages"
+msgstr "Messages"
+
+msgid "Mettre à jour"
+msgstr "Update"
+
+msgid "Modifier"
+msgstr "Edit"
+
+msgid "Modifier l'alerte"
+msgstr "Edit alert"
+
+msgid "Modifier l'offre"
+msgstr "Edit job"
+
+msgid "Modifier la fiche entreprise"
+msgstr "Edit company profile"
+
+msgid "Modifier le mot de passe"
+msgstr "Change password"
+
+msgid "Mon compte"
+msgstr "My account"
+
+msgid "Mon compte recruteur"
+msgstr "My recruiter account"
+
+msgid "Mon espace"
+msgstr "My dashboard"
+
+msgid "Mon parcours"
+msgstr "My background"
+
+msgid "Mon profil"
+msgstr "My profile"
+
+msgid "Mon profil & CV"
+msgstr "My profile & CV"
+
+msgid "Mon profil / CV"
+msgstr "My profile / CV"
+
+msgid "Mon profil candidat"
+msgstr "My candidate profile"
+
+msgid "Mot de passe"
+msgstr "Password"
+
+msgid "Mot de passe modifié"
+msgstr "Password changed"
+
+msgid "Mot de passe oublié"
+msgstr "Forgotten password"
+
+msgid "Mot de passe oublié ?"
+msgstr "Forgot your password?"
+
+msgid "Mots-clés"
+msgstr "Keywords"
+
+msgid "Nom"
+msgstr "Name"
+
+msgid "Notes privées de l'équipe"
+msgstr "Private team notes"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Nouveau mot de passe"
+msgstr "New password"
+
+msgid "Nouvelle alerte"
+msgstr "New alert"
+
+msgid "Nouvelle alerte emploi"
+msgstr "New job alert"
+
+msgid "Offre"
+msgstr "Job"
+
+msgid "Offres"
+msgstr "Jobs"
+
+msgid "Offres de"
+msgstr "Jobs at"
+
+msgid "Offres ouvertes"
+msgstr "Open jobs"
+
+msgid "Offres par ville"
+msgstr "Jobs by city"
+
+msgid "Offres similaires"
+msgstr "Similar jobs"
+
+msgid "Pagination"
+msgstr "Pagination"
+
+msgid "Paramètres"
+msgstr "Settings"
+
+msgid "Parcourez les offres actives et postulez en quelques clics."
+msgstr "Browse active jobs and apply in a few clicks."
+
+msgid "Parcourir les offres"
+msgstr "Browse jobs"
+
+msgid "Part des candidatures ayant atteint chaque étape."
+msgstr "Share of applications that reached each stage."
+
+msgid "Pas encore de compte ?"
+msgstr "No account yet?"
+
+msgid "Pas encore de données."
+msgstr "No data yet."
+
+msgid "Passer le test"
+msgstr "Take the test"
+
+msgid "Performance par offre"
+msgstr "Performance by job"
+
+msgid "Pertinence"
+msgstr "Relevance"
+
+msgid "Pipeline Kanban et tests techniques"
+msgstr "Kanban pipeline and technical tests"
+
+msgid "Pipeline de recrutement"
+msgstr "Hiring pipeline"
+
+msgid "Planifier un entretien"
+msgstr "Schedule an interview"
+
+msgid "Plateforme de recrutement"
+msgstr "Recruitment platform"
+
+msgid "Plus récentes"
+msgstr "Most recent"
+
+msgid "Plus tard"
+msgstr "Later"
+
+msgid "Postuler"
+msgstr "Apply"
+
+msgid "Postuler à l'offre"
+msgstr "Apply for this job"
+
+msgid "Profil"
+msgstr "Profile"
+
+msgid "Profil complété"
+msgstr "Profile completion"
+
+msgid "Progression"
+msgstr "Progress"
+
+msgid "Projet académique"
+msgstr "Academic project"
+
+msgid "Précédent"
+msgstr "Previous"
+
+msgid "Publier une offre"
+msgstr "Post a job"
+
+msgid "Publier votre première offre"
+msgstr "Post your first job"
+
+msgid "Publiez vos offres, suivez vos candidats et recrutez en équipe."
+msgstr "Post jobs, track candidates and hire as a team."
+
+msgid "Période"
+msgstr "Period"
+
+msgid "QCM"
+msgstr "Quiz"
+
+msgid "Questions"
+msgstr "Questions"
+
+msgid ""
+"Recevez des offres adaptées à votre profil et postulez en quelques clics."
+msgstr "Get jobs tailored to your profile and apply in a few clicks."
+
+msgid "Rechercher"
+msgstr "Search"
+
+msgid "Rechercher une offre"
+msgstr "Search jobs"
+
+msgid "Recommandées pour vous"
+msgstr "Recommended for you"
+
+msgid "Recruteur"
+msgstr "Recruiter"
+
+msgid "Recruteurs"
+msgstr "Recruiters"
+
+msgid "Reprendre le test"
+msgstr "Resume the test"
+
+msgid "Retirer"
+msgstr "Remove"
+
+msgid "Retirer ce recruteur de l'équipe ?"
+msgstr "Remove this recruiter from the team?"
+
+msgid "Retirer des favoris"
+msgstr "Unsave job"
+
+msgid "Retirer définitivement cette candidature ?"
+msgstr "Permanently withdraw this application?"
+
+msgid "Retirer ma candidature"
+msgstr "Withdraw my application"
+
+msgid "Retour au choix du profil"
+msgstr "Back to profile choice"
+
+msgid "Retour à l'accueil"
+msgstr "Back to home"
+
+msgid "Retour à l'offre"
+msgstr "Back to the job"
+
+msgid "Retour à la candidature"
+msgstr "Back to the application"
+
+msgid "Retour à la connexion"
+msgstr "Back to log in"
+
+msgid "Retour à mes alertes"
+msgstr "Back to my alerts"
+
+msgid "Retour à mes offres"
+msgstr "Back to my jobs"
+
+msgid "Revoir l'offre"
+msgstr "View the job"
+
+msgid "Réinitialiser les filtres"
+msgstr "Reset filters"
+
+msgid "Répartition des candidatures par statut"
+msgstr "Applications by status"
+
+msgid "Résultat"
+msgstr "Result"
+
+msgid "S'inscrire"
+msgstr "Sign up"
+
+msgid "S'inscrire comme candidat"
+msgstr "Sign up as a candidate"
+
+msgid "S'inscrire comme recruteur"
+msgstr "Sign up as a recruiter"
+
+msgid "Salaire"
+msgstr "Salary"
+
+msgid "Salaire min. (€)"
+msgstr "Min. salary (€)"
+
+msgid "Salaire minimum moyen (CDI) par niveau"
+msgstr "Average minimum salary (permanent) by level"
+
+msgid "Salaire moyen par niveau"
+msgstr "Average salary by level"
+
+msgid "Score au moment de la candidature : %(score)s %%"
+msgstr "Score at application time: %(score)s %%"
+
+msgid "Score de compatibilité pour chaque offre"
+msgstr "A match score for every job"
+
+msgid "Se connecter"
+msgstr "Log in"
+
+msgid ""
+"Seuls les administrateurs de l'entreprise peuvent inviter ou retirer des "
+"recruteurs."
+msgstr "Only company administrators can invite or remove recruiters."
+
+msgid ""
+"Si un compte est associé à cette adresse, un email contenant un lien de "
+"réinitialisation vient d'être envoyé."
+msgstr ""
+"If an account is linked to this address, an email with a reset link has just"
+" been sent."
+
+msgid "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email."
+msgstr "If you did not make this request, please ignore this email."
+
+msgid "Similarité du profil"
+msgstr "Profile similarity"
+
+msgid "Similarité du profil (TF-IDF)"
+msgstr "Profile similarity (TF-IDF)"
+
+msgid "Soumettre mes réponses"
+msgstr "Submit my answers"
+
+msgid "Statistiques"
+msgstr "Analytics"
+
+msgid ""
+"Statistiques calculées en temps réel sur les offres ouvertes de la "
+"plateforme."
+msgstr "Statistics computed live from the platform's open jobs."
+
+msgid "Statistiques de recrutement"
+msgstr "Hiring analytics"
+
+msgid "Statut"
+msgstr "Status"
+
+msgid "Suivant"
+msgstr "Next"
+
+msgid "Suivez vos candidatures et découvrez les offres faites pour vous."
+msgstr "Track your applications and discover jobs made for you."
+
+msgid "Suivre ma candidature"
+msgstr "Track my application"
+
+msgid "Supprimer"
+msgstr "Delete"
+
+msgid "Supprimer l'alerte"
+msgstr "Delete alert"
+
+msgid "Sélectionnez celles à ajouter à votre profil."
+msgstr "Select the ones to add to your profile."
+
+msgid "Talents suggérés (n'ont pas encore postulé)"
+msgstr "Suggested talent (not applied yet)"
+
+msgid "Temps restant"
+msgstr "Time left"
+
+msgid "Tendances"
+msgstr "Trends"
+
+msgid "Tendances du marché"
+msgstr "Market trends"
+
+msgid "Test commencé mais pas encore soumis."
+msgstr "Test started but not submitted yet."
+
+msgid "Test commencé."
+msgstr "Test started."
+
+msgid "Test technique"
+msgstr "Technical test"
+
+msgid "Test technique (QCM)"
+msgstr "Technical test (quiz)"
+
+msgid "Test à passer"
+msgstr "Test to take"
+
+msgid "Texte"
+msgstr "Text"
+
+msgid "Titre"
+msgstr "Title"
+
+msgid "Titre, compétences, entreprise..."
+msgstr "Title, skills, company..."
+
+msgid "Tous"
+msgstr "All"
+
+msgid "Tout marquer comme lu"
+msgstr "Mark all as read"
+
+msgid "Tout voir"
+msgstr "See all"
+
+msgid "Trier par"
+msgstr "Sort by"
+
+msgid "Trouvez votre prochain poste"
+msgstr "Find your next job"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Types de contrat"
+msgstr "Contract types"
+
+msgid "Télécharger le CV"
+msgstr "Download CV"
+
+msgid "Télétravail"
+msgstr "Remote work"
+
+msgid "Téléversez votre CV pour postuler."
+msgstr "Upload your CV to apply."
+
+msgid ""
+"Un profil complet (compétences, expériences, CV) améliore la qualité de vos "
+"recommandations."
+msgstr ""
+"A complete profile (skills, experience, CV) improves your recommendations."
+
+msgid "Une seule tentative. Une soumission hors délai obtient 0 %."
+msgstr "One attempt only. A late submission scores 0 %."
+
+msgid "Voir"
+msgstr "View"
+
+msgid "Voir l'équipe"
+msgstr "View the team"
+
+msgid "Voir la candidature"
+msgstr "View the application"
+
+msgid "Voir la page publique"
+msgstr "View public page"
+
+msgid "Voir le détail"
+msgstr "View details"
+
+msgid "Voir ma candidature"
+msgstr "View my application"
+
+msgid "Voir toutes les offres de l'entreprise"
+msgstr "See all jobs at this company"
+
+msgid "Votre CV enregistré sera joint automatiquement à cette candidature."
+msgstr "Your saved CV will be attached to this application automatically."
+
+msgid "Votre candidature n'a pas été retenue. Ne vous découragez pas !"
+msgstr "Your application was not successful. Don't give up!"
+
+msgid "Votre compatibilité"
+msgstr "Your match"
+
+msgid "Votre compatibilité avec cette offre"
+msgstr "Your match with this job"
+
+msgid "Votre entreprise n'a pas encore publié d'offre d'emploi."
+msgstr "Your company hasn't posted any jobs yet."
+
+msgid "Votre message..."
+msgstr "Your message..."
+
+msgid "Votre mot de passe a bien été modifié."
+msgstr "Your password has been changed."
+
+msgid "Votre mot de passe a été réinitialisé."
+msgstr "Your password has been reset."
+
+msgid ""
+"Vous avez demandé la réinitialisation de votre mot de passe DevHire. Cliquez"
+" sur le lien ci-dessous pour en choisir un nouveau :"
+msgstr ""
+"You asked to reset your DevHire password. Click the link below to choose a "
+"new one:"
+
+msgid "Vous avez déjà postulé à cette offre."
+msgstr "You have already applied for this job."
+
+msgid "Vous avez déjà un compte ?"
+msgstr "Already have an account?"
+
+msgid "Vous avez postulé avant sa désactivation."
+msgstr "You applied before it was deactivated."
+
+msgid "Vous avez retiré cette candidature."
+msgstr "You withdrew this application."
+
+msgid ""
+"Vous avez été invité(e) à rejoindre l'équipe de recrutement de "
+"<strong>%(company)s</strong>."
+msgstr ""
+"You have been invited to join the hiring team at "
+"<strong>%(company)s</strong>."
+
+msgid "Vous cherchez un emploi ou vous recrutez ?"
+msgstr "Looking for a job or hiring?"
+
+msgid "Vous n'avez aucune offre en favori."
+msgstr "You have no saved jobs."
+
+msgid "Vous n'avez pas encore postulé à une offre."
+msgstr "You haven't applied for any job yet."
+
+msgid "Vues"
+msgstr "Views"
+
+msgid "Vues et candidatures par jour"
+msgstr "Views and applications per day"
+
+msgid "Vues et candidatures — %(days)s derniers jours"
+msgstr "Views and applications — last %(days)s days"
+
+msgid "Vues → candidatures"
+msgstr "Views → applications"
+
+msgid "[DevHire] Réinitialisation de votre mot de passe"
+msgstr "[DevHire] Reset your password"
+
+msgid "an(s) d'expérience"
+msgstr "year(s) of experience"
+
+msgid "aujourd'hui"
+msgstr "present"
+
+msgid "bonnes réponses"
+msgstr "correct answers"
+
+msgid "candidature envoyée le %(date)s"
+msgstr "applied on %(date)s"
+
+msgid "lu"
+msgstr "read"
+
+msgid "nouvelle(s)"
+msgstr "new"
+
+msgid "ou"
+msgstr "or"
+
+msgid "par"
+msgstr "by"
+
+msgid "publiée le %(date)s"
+msgstr "posted on %(date)s"
+
+msgid "pénurie"
+msgstr "shortage"
+
+msgid "retirée(s)"
+msgstr "withdrawn"
+
+msgid "soumis le"
+msgstr "submitted on"
+
+msgid "texte analysé pour le matching"
+msgstr "text analysed for matching"
+
+msgid "vous"
+msgstr "you"
+
+msgid "À propos de %(name)s"
+msgstr "About %(name)s"
+
+msgid "Équipe"
+msgstr "Team"
+
+msgid "Équipe de recrutement"
+msgstr "Hiring team"
