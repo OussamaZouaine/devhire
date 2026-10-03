@@ -16,22 +16,37 @@ Console puis à les ajouter au fichier `.env`.
 | `allauth.socialaccount.providers.google` | `INSTALLED_APPS` dans `config/settings.py` | Active le fournisseur Google |
 | `SOCIALACCOUNT_PROVIDERS["google"]` | `config/settings.py` | Lit `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` depuis `.env` |
 | `path("auth/", include("allauth.urls"))` | `config/urls.py` | Expose les URL de connexion et de retour (callback) |
-| `SocialAccountAdapter` | `accounts/adapters.py` | Un utilisateur qui s'inscrit avec Google devient **candidat** |
-| Bouton Google | `templates/accounts/login.html` | Affiché **uniquement** si `GOOGLE_CLIENT_ID` est renseigné |
+| `GoogleSignUpView` | `accounts/views.py` (`/compte/inscription/google/<rôle>/`) | Mémorise le rôle choisi (candidat / recruteur) puis redirige vers Google |
+| `SocialAccountAdapter` | `accounts/adapters.py` | Attribue le rôle, crée automatiquement les candidats, demande l'entreprise aux recruteurs |
+| `AccountAdapter` | `accounts/adapters.py` | Redirige vers l'espace candidat ou recruteur après la connexion |
+| `SocialSignupForm` | `accounts/forms.py` + `templates/socialaccount/signup.html` | Formulaire final des recruteurs (nom de l'entreprise) |
+| Boutons Google | connexion, choix du profil, inscription candidat et recruteur | Affichés **uniquement** si `GOOGLE_CLIENT_ID` est renseigné |
 
-Le parcours de l'utilisateur :
+### Où se trouvent les boutons et ce qu'ils font
+
+| Page | Bouton | Résultat pour un **nouvel** utilisateur |
+|---|---|---|
+| `/compte/connexion/` | « Continuer avec Google » | Compte **candidat** créé automatiquement |
+| `/compte/inscription/` (choix du profil) | « Avec Google » sous chaque carte | Candidat ou recruteur selon la carte |
+| `/compte/inscription/candidat/` | « S'inscrire avec Google » | Compte **candidat** créé automatiquement |
+| `/compte/inscription/recruteur/` | « S'inscrire avec Google » | Formulaire final demandant le **nom de l'entreprise**, puis compte **recruteur** (administrateur de l'entreprise) |
+
+Si un compte DevHire existe déjà avec la même adresse email, il est **relié** automatiquement et l'utilisateur est
+simplement connecté avec son rôle actuel (`SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True`). Le bouton n'est pas
+proposé sur les invitations d'équipe : un recruteur invité crée son compte avec le formulaire de l'invitation.
+
+Le parcours :
 
 ```
-Clic « Continuer avec Google »
-   → /auth/google/login/                (DevHire redirige vers Google)
-   → écran de consentement Google       (l'utilisateur choisit son compte)
-   → /auth/google/login/callback/       (Google renvoie vers DevHire avec un code)
-   → compte créé ou retrouvé par email  → utilisateur connecté
+Clic « S'inscrire avec Google » (recruteur)
+   → /compte/inscription/google/recruiter/   (le rôle est mémorisé en session)
+   → /auth/google/login/                     (DevHire redirige vers Google)
+   → écran de consentement Google            (l'utilisateur choisit son compte)
+   → /auth/google/login/callback/            (Google renvoie vers DevHire avec un code)
+   → candidat : compte créé directement
+     recruteur : /auth/3rdparty/signup/ (nom de l'entreprise) → compte et entreprise créés
+   → espace candidat ou tableau de bord recruteur
 ```
-
-Si un compte DevHire existe déjà avec la même adresse email, il est relié automatiquement
-(`SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True`). Sinon, un nouveau compte **candidat** est créé.
-Les recruteurs continuent de s'inscrire avec le formulaire classique, car il faut créer leur entreprise.
 
 ---
 
@@ -110,11 +125,23 @@ les settings.
 
 ## Étape 5 — Tester
 
-1. Ouvrez <http://127.0.0.1:8000/compte/connexion/>.
-2. Le bouton **« Continuer avec Google »** apparaît au-dessus du formulaire.
-3. Cliquez dessus, choisissez un compte Google (un **utilisateur de test** si l'application est en mode Test).
-4. Vous revenez sur DevHire, connecté en tant que **candidat**.
-5. Vérifiez dans l'admin (`/admin/` → *Comptes sociaux*) que le compte Google est bien rattaché à l'utilisateur.
+**Candidat**
+
+1. Ouvrez <http://127.0.0.1:8000/compte/inscription/candidat/> et cliquez sur **« S'inscrire avec Google »**.
+2. Choisissez un compte Google (un **utilisateur de test** si l'application est en mode Test).
+3. Vous arrivez dans l'espace candidat, connecté.
+
+**Recruteur**
+
+1. Avec un **autre** compte Google, ouvrez <http://127.0.0.1:8000/compte/inscription/recruteur/> et cliquez sur
+   **« S'inscrire avec Google »**.
+2. Après Google, la page **« Finaliser l'inscription »** demande le nom de l'entreprise.
+3. Validez : vous arrivez sur le tableau de bord recruteur, administrateur de la nouvelle entreprise.
+
+Vérifiez ensuite dans l'admin (`/admin/` → *Comptes sociaux*) que les comptes Google sont rattachés aux utilisateurs.
+
+> Pour recommencer un test avec le même compte Google, supprimez d'abord l'utilisateur dans l'admin : sinon DevHire
+> le reconnaît et le connecte simplement avec son rôle actuel.
 
 ---
 
@@ -131,8 +158,6 @@ les settings.
 
 ## Aller plus loin
 
-- **Rôle recruteur via Google** : modifiez `accounts/adapters.py` (`populate_user`) pour proposer un choix de rôle
-  après la première connexion, par exemple avec une redirection vers une page « Je suis candidat / recruteur ».
 - **Récupérer la photo de profil** : `sociallogin.account.extra_data["picture"]` contient l'URL de l'avatar Google.
 - **Autres fournisseurs** (GitHub, LinkedIn) : ajoutez `allauth.socialaccount.providers.github` ou `.openid_connect`
   dans `INSTALLED_APPS` et une entrée dans `SOCIALACCOUNT_PROVIDERS` sur le même modèle.
