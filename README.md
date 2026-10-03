@@ -1,145 +1,193 @@
 # DevHire
 
-Plateforme de recrutement Django (MVT) pour projet académique — candidats, recruteurs, offres d'emploi et candidatures.
+Plateforme de recrutement Django (MVT) pour projet académique — candidats, recruteurs, entreprises, offres d'emploi,
+matching intelligent, pipeline de recrutement, tests techniques, messagerie, statistiques et API REST.
 
 ## Stack
 
-- **Python** 3.12+
-- **Django** 5.2 LTS
-- **SQLite** (développement)
-- **Bootstrap 5** + django-crispy-forms
-- **WhiteNoise** (fichiers statiques)
-- **Pillow** (logos entreprise)
+- **Python** 3.12+ / **Django** 5.2 LTS
+- **PostgreSQL** (recherche plein texte en français)
+- **Bootstrap 5** + django-crispy-forms, **HTMX** (notifications et messagerie en direct), **SortableJS** (Kanban),
+  **Chart.js** (statistiques)
+- **Django REST Framework** + JWT + **drf-spectacular** (Swagger)
+- **Celery** + **Redis** (emails, analyse des CV, alertes emploi) — optionnels en développement
+- **django-allauth** (connexion Google), **pypdf** (lecture des CV), **WhiteNoise**
+
+## Fonctionnalités
+
+### Candidats
+- Inscription / connexion (ou **Google**), mot de passe oublié
+- Profil complet : titre, compétences, CV PDF, **expériences, formations, langues**, taux de complétion
+- **Analyse du CV** : le texte du PDF est extrait et les compétences détectées sont proposées
+- **Score de compatibilité** avec chaque offre (détail : compétences communes / manquantes)
+- **Recommandations** d'offres personnalisées
+- Recherche avec filtres (mots-clés, ville, contrat, télétravail, expérience, salaire, compétence) et tri
+- **Favoris** et **alertes emploi** (email quotidien des nouvelles offres)
+- Suivi de candidature : étapes, historique, entretiens (**export .ics**), test technique, retrait
+- **Messagerie** avec le recruteur et **notifications** en direct
+
+### Recruteurs et entreprises
+- **Entreprise** partagée par plusieurs recruteurs : rôles administrateur / recruteur, **invitations par email**
+- Page publique de l'entreprise, fiche entreprise avec logo
+- Offres : compétences requises, télétravail, niveau, salaire, **date limite**
+- **Pipeline Kanban** (glisser-déposer) : Reçue → Présélectionnée → Entretien → Test technique → Proposition → Embauché(e)
+  / Refusée, candidats triés par compatibilité, **talents suggérés**
+- Fiche candidature : score détaillé, **notes privées d'équipe**, historique, **planification d'entretiens**
+- **QCM chronométré** par offre, corrigé automatiquement
+- **Statistiques** : vues, taux de conversion, entonnoir, délai de réponse, performance par offre
+
+### Plateforme
+- Page publique **Tendances du marché** (offres par ville, compétences en pénurie, salaires)
+- **API REST** documentée (Swagger), authentification JWT
+- Interface **français / anglais**
+
+## Le matching (partie algorithmique)
+
+Le module `matching/engine.py` (Python pur, sans bibliothèque de ML) combine deux mesures :
+
+1. **Recouvrement de compétences** : `|compétences candidat ∩ compétences offre| / |compétences offre|`
+2. **Similarité textuelle TF-IDF** entre le profil (titre, bio, compétences, expériences, texte du CV) et l'offre
+   (titre, description, compétences) :
+   - `tf(t, d) = occurrences(t, d) / longueur(d)`
+   - `idf(t) = ln((1 + N) / (1 + df(t))) + 1` — l'IDF est appris sur toutes les offres ouvertes : un mot rare
+     (« Kubernetes ») pèse plus qu'un mot courant (« développeur »)
+   - `cos(a, b) = Σ aₜ·bₜ / (‖a‖·‖b‖)`
+
+**Score final = 70 % compétences + 30 % similarité textuelle** (100 % texte si l'offre n'a pas de compétences).
+Le texte est normalisé : minuscules, accents supprimés, mots vides français et anglais retirés, termes techniques
+conservés (`c++`, `node.js`, `c#`).
 
 ## Structure des apps
 
 ```
 devhire/
-├── config/          # settings, urls racine
-├── accounts/        # User custom, profils Candidat/Recruteur, auth
-├── jobs/            # Offres d'emploi (CRUD recruteur)
-├── applications/    # Candidatures et gestion des statuts
-├── core/            # Recherche d'offres (accueil), dashboard candidat
-├── templates/       # Templates globaux
-├── static/          # Fichiers statiques
+├── config/          # settings, urls racine, Celery
+├── accounts/        # Utilisateurs, profils, entreprises, invitations, parcours candidat
+├── matching/        # Compétences, algorithme de matching (TF-IDF), analyse des CV
+├── jobs/            # Offres, recherche (plein texte), favoris, alertes, suivi des vues
+├── applications/    # Candidatures, pipeline, historique, notes, entretiens
+├── assessments/     # QCM chronométrés
+├── messaging/       # Messagerie et notifications
+├── analytics/       # Statistiques recruteur et tendances du marché
+├── api/             # API REST (DRF + JWT + Swagger)
+├── core/            # Accueil / recherche, espace candidat, données de démo, traductions
+├── templates/       # Templates (rangés par app)
+├── locale/          # Traductions (en)
+├── static/          # CSS
 └── media/           # CVs et logos uploadés
 ```
 
 ## Installation
 
-### 1. Cloner et entrer dans le projet
-
-```bash
-cd devhire
-```
-
-### 2. Environnement virtuel
-
 ```bash
 python -m venv venv
-
-# Windows (Git Bash / PowerShell)
-source venv/Scripts/activate
-
-# Linux / macOS
-source venv/bin/activate
-```
-
-### 3. Dépendances
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Variables d'environnement
-
-```bash
-cp .env.example .env
-```
-
-Éditez `.env` et définissez au minimum `SECRET_KEY` et `DEBUG`.
-
-### 5. Base de données
-
-```bash
+source venv/Scripts/activate        # Windows (Git Bash) — Linux/macOS : source venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env                # puis définir SECRET_KEY et DATABASE_URL
+createdb -U postgres devhire        # ou : docker compose up -d db (PostgreSQL sur le port 5433)
 python manage.py migrate
+python manage.py createsuperuser    # accès /admin/
+python manage.py seed_demo_data     # données de démonstration (recommandé pour la soutenance)
+python manage.py runserver
 ```
 
-### 6. Superuser (accès admin)
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Données de démonstration (recommandé pour la soutenance)
-
-```bash
-python manage.py seed_demo_data
-```
-
-Pour réinitialiser les données de démo :
-
-```bash
-python manage.py seed_demo_data --clear
-```
+Ouvrez [http://127.0.0.1:8000/](http://127.0.0.1:8000/). Sans configuration supplémentaire, les emails s'affichent dans
+la console et les tâches Celery s'exécutent immédiatement (pas besoin de Redis).
 
 **Comptes de démo** (mot de passe : `devhire123`) :
 
 | Rôle | Identifiant |
 |------|-------------|
-| Recruteur | `recruiter1`, `recruiter2` |
-| Candidat | `candidate1`, `candidate2`, `candidate3` |
+| Recruteur administrateur | `recruiter1` (TechNova), `recruiter2` (GreenLabs) |
+| Recruteur membre | `recruiter3` (TechNova) |
+| Candidat | `candidate1` (Alice), `candidate2` (Bob), `candidate3` (Chloé), `candidate4` (David) |
 
-### 8. Lancer le serveur
+`python manage.py seed_demo_data --clear` réinitialise les données de démo.
+
+### Options
+
+| Variable `.env` | Effet |
+|---|---|
+| `DATABASE_URL=postgres://user:pass@localhost:5432/devhire` | Base PostgreSQL (obligatoire) |
+| `CELERY_BROKER_URL=redis://localhost:6379/0` | Tâches en arrière-plan (lancer `celery -A config worker` et `celery -A config beat`) |
+| `EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_*` | Envoi réel des emails |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Bouton « Continuer avec Google » — voir [docs/CONNEXION_GOOGLE.md](docs/CONNEXION_GOOGLE.md) |
+| `HTTPS=True` | Cookies sécurisés, HSTS, redirection HTTPS (production) |
+
+Les alertes emploi peuvent aussi être envoyées à la main : `python manage.py shell -c "from jobs.tasks import send_job_alerts; send_job_alerts()"`.
+
+## Charte graphique
+
+| Élément | Valeur |
+|---|---|
+| Couleur principale (indigo) | `#4f46e5` |
+| Accent (violet) | `#7c3aed` — dégradé de marque `#4f46e5 → #7c3aed → #c026d3` |
+| Texte / fond | ardoise `#0f172a` / `#f8fafc` |
+| Police | [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) |
+| Icônes | [Bootstrap Icons](https://icons.getbootstrap.com/) |
+
+Les couleurs sont définies une seule fois comme variables CSS dans `static/css/app.css`, qui surcharge aussi les
+variables de Bootstrap : tous les composants suivent la charte. Le logo est `static/favicon.svg`.
+
+## Docker
+
+Pile complète (Django + PostgreSQL + Redis + worker Celery + Celery beat) :
 
 ```bash
-python manage.py runserver
+docker compose up --build
+docker compose exec web python manage.py seed_demo_data
+docker compose exec web python manage.py createsuperuser
 ```
 
-Ouvrez [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+## API REST
 
-## Fichiers statiques (production)
+Documentation interactive : [/api/docs/](http://127.0.0.1:8000/api/docs/) (Swagger) ou `/api/redoc/`.
 
 ```bash
-python manage.py collectstatic --noinput
+# Obtenir un jeton
+curl -X POST http://127.0.0.1:8000/api/auth/token/ -d "username=candidate1&password=devhire123"
+# Offres recommandées pour le candidat
+curl -H "Authorization: Bearer <access>" http://127.0.0.1:8000/api/offres/recommended/
 ```
 
-WhiteNoise sert les fichiers depuis `staticfiles/` en production.
+Principales routes : `offres/` (filtres `q`, `location`, `contract_type`, `remote_policy`, `salary_min`, `skill`, `sort`),
+`offres/{id}/match/`, `offres/mine/`, `candidatures/` (postuler, `status`, `withdraw`), `notifications/`, `competences/`,
+`entreprises/`, `moi/`.
 
-## Tests
+## Tests et qualité
 
 ```bash
-python manage.py test core.tests
+python manage.py test                 # 121 tests
+coverage run manage.py test && coverage report   # couverture ≥ 80 % exigée (actuellement 96 %)
+ruff check . && ruff format --check .
 ```
 
-## Fonctionnalités principales
+La CI GitHub Actions (`.github/workflows/ci.yml`) lance le lint puis les tests sur **PostgreSQL**, vérifie les
+migrations manquantes et les traductions. Les tests créent automatiquement une base `test_devhire`.
 
-- Inscription / connexion séparée **Candidat** / **Recruteur**
-- Recruteur : publier, modifier, activer/désactiver des offres
-- Candidat : profil + CV PDF, postuler, suivre ses candidatures
-- Recherche d'offres par mots-clés, localisation et type de contrat
-- Recruteur : consulter les candidatures, accepter / refuser
-- Téléchargement sécurisé des CV (pas d'accès direct à `/media/cvs/`)
+## Traductions
+
+L'interface est en français avec une traduction anglaise (sélecteur FR / EN dans la barre de navigation). Les chaînes
+des templates sont extraites et compilées sans GNU gettext :
+
+```bash
+python manage.py build_translations           # régénère locale/en/LC_MESSAGES/django.po et .mo
+python manage.py build_translations --check   # échoue si une chaîne n'est pas traduite
+```
+
+Les traductions anglaises sont dans `locale/en/translations.json`. Les messages générés côté Python (notifications,
+messages de confirmation) restent en français.
 
 ## URLs utiles
 
 | URL | Description |
 |-----|-------------|
 | `/` | Recherche d'offres |
-| `/compte/connexion/` | Connexion |
-| `/compte/inscription/` | Inscription |
-| `/offres/mes-offres/` | Dashboard recruteur |
-| `/mes-candidatures/` | Dashboard candidat |
+| `/mes-candidatures/` | Espace candidat |
+| `/offres/mes-offres/` | Offres de l'entreprise (recruteur) |
+| `/candidatures/offre/<id>/` | Pipeline Kanban d'une offre |
+| `/statistiques/recruteur/` | Statistiques recruteur |
+| `/statistiques/tendances/` | Tendances du marché |
+| `/messagerie/` | Messagerie |
+| `/api/docs/` | Documentation de l'API |
 | `/admin/` | Administration Django |
-
-## Déploiement (rappel)
-
-En production, configurez dans `.env` :
-
-```env
-DEBUG=False
-SECRET_KEY=<clé-générée-aléatoirement>
-ALLOWED_HOSTS=votredomaine.com,www.votredomaine.com
-```
-
-Puis `collectstatic` et servez l'application via Gunicorn/uWSGI + reverse proxy.
