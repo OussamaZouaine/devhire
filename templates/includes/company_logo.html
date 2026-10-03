@@ -1,0 +1,1 @@
+{% if company.logo %}<img src="{{ company.logo.url }}" alt="{{ company.name }}" class="company-logo">{% else %}<span class="company-logo-placeholder" aria-hidden="true">{{ company.name|slice:":1"|upper }}</span>{% endif %}

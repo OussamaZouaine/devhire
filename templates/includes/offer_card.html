@@ -1,0 +1,56 @@
+{% load i18n %}
+<div class="card offer-card card-hover h-100">
+    <div class="card-body d-flex flex-column p-4">
+        <div class="d-flex gap-3 mb-3">
+            {% include "includes/company_logo.html" with company=offer.company %}
+            <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <h2 class="h5 card-title mb-1">
+                        <a href="{% url 'jobs:job_offer_detail' offer.pk %}">{{ offer.title }}</a>
+                    </h2>
+                    {% include "includes/match_badge.html" with match=offer.match %}
+                </div>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ offer.company.get_absolute_url }}" class="meta fw-semibold"><i class="bi bi-building"></i>{{ offer.company.name }}</a>
+                    <span class="meta"><i class="bi bi-geo-alt"></i>{{ offer.location }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="chip chip-primary"><i class="bi bi-briefcase"></i>{{ offer.get_contract_type_display }}</span>
+            <span class="chip"><i class="bi bi-laptop"></i>{{ offer.get_remote_policy_display }}</span>
+            <span class="chip"><i class="bi bi-bar-chart-steps"></i>{{ offer.get_experience_level_display }}</span>
+            {% if offer.salary_min or offer.salary_max %}
+                <span class="chip"><i class="bi bi-cash-stack"></i>{% if offer.salary_min %}{{ offer.salary_min }}{% endif %}{% if offer.salary_min and offer.salary_max %}–{% endif %}{% if offer.salary_max %}{{ offer.salary_max }}{% endif %} €</span>
+            {% endif %}
+        </div>
+        <p class="card-text small text-secondary flex-grow-1">{{ offer.description|truncatewords:26 }}</p>
+        {% if offer.skills.all %}
+            <div class="mb-3">
+                {% for skill in offer.skills.all|slice:":6" %}
+                    <span class="skill-chip{% if offer.match and skill.name in offer.match.matched_skills %} matched{% endif %}">{{ skill.name }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            {% if offer.deadline %}
+                <span class="meta small"><i class="bi bi-calendar-event"></i>{% translate "Jusqu'au" %} {{ offer.deadline|date:"d/m/Y" }}</span>
+            {% else %}
+                <span class="meta small"><i class="bi bi-clock"></i>{{ offer.created_at|timesince }}</span>
+            {% endif %}
+            <span class="d-flex align-items-center gap-2">
+                {% if user.is_authenticated and user.role == "candidate" %}
+                    <form method="post" action="{% url 'jobs:toggle_saved_job' offer.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn btn-save {% if offer.pk in saved_ids %}btn-danger{% else %}btn-outline-secondary{% endif %}"
+                                title="{% if offer.pk in saved_ids %}{% translate 'Retirer des favoris' %}{% else %}{% translate 'Ajouter aux favoris' %}{% endif %}">
+                            <i class="bi {% if offer.pk in saved_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="{% url 'jobs:job_offer_detail' offer.pk %}" class="btn btn-sm btn-outline-primary">{% translate "Voir le détail" %} <i class="bi bi-arrow-right"></i></a>
+            </span>
+        </div>
+    </div>
+</div>

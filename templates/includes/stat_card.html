@@ -1,0 +1,10 @@
+<div class="card stat-card h-100">
+    <div class="card-body">
+        <span class="stat-icon {{ tone }}"><i class="bi {{ icon }}"></i></span>
+        <div class="min-w-0">
+            <div class="stat-label">{% if url %}<a href="{{ url }}" class="text-reset">{{ label }}</a>{% else %}{{ label }}{% endif %}</div>
+            <div class="stat-value">{{ value }}{{ suffix }}</div>
+            {% if hint %}<div class="small text-muted">{{ hint }}</div>{% endif %}
+        </div>
+    </div>
+</div>

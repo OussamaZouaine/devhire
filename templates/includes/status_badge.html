@@ -1,0 +1,1 @@
+<span class="badge bg-{{ application.status_color }}{% if application.status_color == 'warning' or application.status_color == 'light' or application.status_color == 'info' %} text-dark{% endif %}">{{ application.get_status_display }}</span>

@@ -1,0 +1,28 @@
+<datalist id="skill-suggestions"></datalist>
+<script>
+// Autocomplete for comma-separated skill inputs, backed by the API.
+document.addEventListener("DOMContentLoaded", () => {
+    const datalist = document.getElementById("skill-suggestions");
+    document.querySelectorAll('input[list="skill-suggestions"]').forEach((input) => {
+        let timer;
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            const parts = input.value.split(",");
+            const current = parts[parts.length - 1].trim();
+            if (current.length < 2) return;
+            timer = setTimeout(async () => {
+                const response = await fetch(`{% url 'api:skill-list' %}?q=${encodeURIComponent(current)}`);
+                if (!response.ok) return;
+                const skills = await response.json();
+                const prefix = parts.slice(0, -1).map((p) => p.trim()).filter(Boolean);
+                datalist.innerHTML = "";
+                skills.forEach((skill) => {
+                    const option = document.createElement("option");
+                    option.value = [...prefix, skill.name].join(", ");
+                    datalist.appendChild(option);
+                });
+            }, 200);
+        });
+    });
+});
+</script>
