@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Candidatures" %} — {{ job_offer.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'jobs:recruiter_dashboard' %}">{% translate "Mes offres" %}</a></li>
+        <li class="breadcrumb-item active">{{ job_offer.title }}</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div>
+        <h1 class="h3">{% translate "Pipeline de recrutement" %}</h1>
+        <p class="subtitle">
+            {{ job_offer.title }} · {{ job_offer.location }} ·
+            {% blocktranslate count counter=application_count %}{{ counter }} candidature{% plural %}{{ counter }} candidatures{% endblocktranslate %}
+            {% if withdrawn_count %}· {{ withdrawn_count }} {% translate "retirée(s)" %}{% endif %}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'assessments:quiz_manage' job_offer.pk %}" class="btn btn-outline-secondary"><i class="bi bi-ui-checks me-1"></i>{% translate "Test technique" %}</a>
+        <a href="{% url 'jobs:job_offer_update' job_offer.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>{% translate "Modifier l'offre" %}</a>
+    </div>
+</div>
+
+<p class="small text-muted"><i class="bi bi-arrows-move me-1"></i>
+    {% translate "Glissez-déposez une carte pour changer l'étape : le candidat est notifié automatiquement. Les candidats sont triés par score de compatibilité." %}
+</p>
+
+<div id="kanban-error" class="alert alert-danger d-none" role="alert"></div>
+
+<div class="kanban mb-4">
+    {% for status, label, color, applications in columns %}
+        <div class="kanban-column">
+            <div class="kanban-column-header border-{{ color }} d-flex justify-content-between align-items-center">
+                <span>{{ label }}</span>
+                <span class="badge bg-{{ color }}{% if color == 'warning' or color == 'info' %} text-dark{% endif %} column-count">{{ applications|length }}</span>
+            </div>
+            <div class="kanban-cards" data-status="{{ status }}">
+                {% for application in applications %}
+                    <div class="card kanban-card shadow-sm" data-id="{{ application.pk }}"
+                         data-url="{% url 'applications:update_application_status' application.pk %}">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between align-items-start gap-1">
+                                <a href="{% url 'applications:application_detail' application.pk %}" class="fw-medium small">
+                                    {{ application.candidate.user.display_name }}
+                                </a>
+                                {% include "includes/match_badge.html" with match=application.match %}
+                            </div>
+                            {% if application.candidate.headline %}
+                                <div class="small text-muted text-truncate">{{ application.candidate.headline }}</div>
+                            {% endif %}
+                            <div class="small text-muted">{{ application.applied_at|date:"d/m/Y" }}</div>
+                            {% if application.quiz_attempt and application.quiz_attempt.is_submitted %}
+                                <div class="small">QCM : <strong>{{ application.quiz_attempt.score }} %</strong></div>
+                            {% endif %}
+                            {% if application.match.matched_skills %}
+                                <div class="mt-1">
+                                    {% for skill in application.match.matched_skills|slice:":3" %}<span class="skill-chip matched">{{ skill }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                            <noscript>
+                                <form method="post" action="{% url 'applications:update_application_status' application.pk %}" class="mt-1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="pipeline">
+                                    <select name="status" class="form-select form-select-sm">
+                                        {% for s, l, c, a in columns %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary mt-1">OK</button>
+                                </form>
+                            </noscript>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% if top_candidates %}
+    <div class="card">
+        <div class="card-header"><i class="bi bi-stars text-primary me-2"></i>{% translate "Talents suggérés (n'ont pas encore postulé)" %}</div>
+        <ul class="list-group list-group-flush">
+            {% for candidate, match in top_candidates %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'accounts:candidate_public_profile' candidate.pk %}" class="fw-medium">{{ candidate.user.display_name }}</a>
+                        <span class="small text-muted">{{ candidate.headline }}{% if candidate.location %} · {{ candidate.location }}{% endif %}</span>
+                        <div>{% for skill in match.matched_skills|slice:":5" %}<span class="skill-chip matched">{{ skill }}</span>{% endfor %}</div>
+                    </div>
+                    {% include "includes/match_badge.html" %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js" crossorigin="anonymous"></script>
+<script>
+(() => {
+    const csrfToken = "{{ csrf_token }}";
+    const errorBox = document.getElementById("kanban-error");
+
+    function refreshCounts() {
+        document.querySelectorAll(".kanban-column").forEach((column) => {
+            column.querySelector(".column-count").textContent = column.querySelectorAll(".kanban-card").length;
+        });
+    }
+
+    document.querySelectorAll(".kanban-cards").forEach((list) => {
+        new Sortable(list, {
+            group: "pipeline",
+            animation: 150,
+            ghostClass: "kanban-ghost",
+            onAdd: async (event) => {
+                const card = event.item;
+                errorBox.classList.add("d-none");
+                try {
+                    const response = await fetch(card.dataset.url, {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "X-CSRFToken": csrfToken},
+                        body: JSON.stringify({status: event.to.dataset.status}),
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.ok) throw new Error(data.error || "Erreur");
+                } catch (error) {
+                    event.from.insertBefore(card, event.from.children[event.oldIndex] || null);
+                    errorBox.textContent = error.message;
+                    errorBox.classList.remove("d-none");
+                }
+                refreshCounts();
+            },
+        });
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ application.candidate.user.display_name }} — {{ application.job_offer.title }}{% endblock %}
+
+{% block content %}
+{% with candidate=application.candidate %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'jobs:recruiter_dashboard' %}">{% translate "Mes offres" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'applications:pipeline' application.job_offer.pk %}">{{ application.job_offer.title }}</a></li>
+        <li class="breadcrumb-item active">{{ candidate.user.display_name }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ candidate.user.display_name }} {% include "includes/status_badge.html" %}</h1>
+        <p class="text-muted mb-0">
+            {% if candidate.headline %}{{ candidate.headline }} · {% endif %}
+            {% if candidate.location %}{{ candidate.location }} · {% endif %}
+            {{ candidate.years_of_experience }} {% translate "an(s) d'expérience" %}
+        </p>
+        <p class="small mb-0">
+            <a href="mailto:{{ candidate.user.email }}">{{ candidate.user.email }}</a>
+            {% if candidate.phone %} · {{ candidate.phone }}{% endif %}
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if candidate.cv %}<a href="{% url 'applications:download_cv' application.pk %}" class="btn btn-outline-secondary">{% translate "Télécharger le CV" %}</a>{% endif %}
+        <a href="{% url 'messaging:thread' application.pk %}" class="btn btn-outline-primary">{% translate "Messages" %}</a>
+        {% if not application.is_closed %}
+            <a href="{% url 'applications:schedule_interview' application.pk %}" class="btn btn-primary">{% translate "Planifier un entretien" %}</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 card-title mb-0">{% translate "Compatibilité avec l'offre" %}</h2>
+                    <span class="stat-value">{{ match.score }} %</span>
+                </div>
+                <div class="row small">
+                    <div class="col-sm-6">
+                        {% translate "Compétences" %} : {{ match.skill_score }} %
+                        <div class="progress mb-2" style="height: 6px;"><div class="progress-bar bg-success" style="width: {{ match.skill_score }}%"></div></div>
+                    </div>
+                    <div class="col-sm-6">
+                        {% translate "Similarité du profil (TF-IDF)" %} : {{ match.text_score }} %
+                        <div class="progress mb-2" style="height: 6px;"><div class="progress-bar" style="width: {{ match.text_score }}%"></div></div>
+                    </div>
+                </div>
+                {% for skill in match.matched_skills %}<span class="skill-chip matched">{{ skill }}</span>{% endfor %}
+                {% for skill in match.missing_skills %}<span class="skill-chip missing">{{ skill }}</span>{% endfor %}
+                {% if application.match_score is not None and application.match_score != match.score %}
+                    <p class="small text-muted mt-2 mb-0">{% blocktranslate with score=application.match_score %}Score au moment de la candidature : {{ score }} %{% endblocktranslate %}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if quiz_attempt %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5 card-title">{% translate "Test technique" %}</h2>
+                    {% if quiz_attempt.is_submitted %}
+                        <p class="mb-0">
+                            <strong>{{ quiz_attempt.score }} %</strong> — {{ quiz_attempt.correct_answers }}/{{ quiz_attempt.total_questions }} {% translate "bonnes réponses" %}
+                            · {% translate "soumis le" %} {{ quiz_attempt.submitted_at|date:"d/m/Y H:i" }}
+                            {% if quiz_attempt.timed_out %}<span class="badge bg-danger ms-1">{% translate "Hors délai" %}</span>{% endif %}
+                        </p>
+                    {% else %}
+                        <p class="mb-0 text-muted">{% translate "Test commencé mais pas encore soumis." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if application.cover_letter %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5 card-title">{% translate "Lettre de motivation" %}</h2>
+                    <p class="card-text">{{ application.cover_letter|linebreaksbr }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 card-title">{% translate "Profil" %}</h2>
+                {% if candidate.bio %}<p>{{ candidate.bio|linebreaksbr }}</p>{% endif %}
+                <p>{% for skill in candidate.skills.all %}<span class="skill-chip">{{ skill.name }}</span>{% empty %}<span class="text-muted small">{% translate "Aucune compétence renseignée." %}</span>{% endfor %}</p>
+                {% include "accounts/includes/background.html" with profile=candidate %}
+            </div>
+        </div>
+
+        <div class="card mb-4" id="notes">
+            <div class="card-header">{% translate "Notes privées de l'équipe" %}</div>
+            <div class="card-body">
+                <form method="post" action="{% url 'applications:add_note' application.pk %}" class="mb-3">
+                    {% csrf_token %}
+                    {{ note_form.content }}
+                    <button type="submit" class="btn btn-sm btn-primary mt-2">{% translate "Ajouter la note" %}</button>
+                </form>
+                {% for note in application.notes.all %}
+                    <div class="border-start border-3 ps-2 mb-3">
+                        <div class="small text-muted">{{ note.author.display_name|default:"—" }} · {{ note.created_at|date:"d/m/Y H:i" }}</div>
+                        <div>{{ note.content|linebreaksbr }}</div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted small mb-0">{% translate "Aucune note pour le moment." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        {% if application.status != "withdrawn" %}
+            <div class="card mb-4">
+                <div class="card-header">{% translate "Changer l'étape" %}</div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'applications:update_application_status' application.pk %}">
+                        {% csrf_token %}
+                        <div class="mb-2">{{ status_form.status }}</div>
+                        <div class="mb-2"><input type="text" name="note" class="form-control form-control-sm" maxlength="255" placeholder="{% translate 'Commentaire (optionnel)' %}"></div>
+                        <button type="submit" class="btn btn-primary btn-sm">{% translate "Mettre à jour" %}</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if application.interviews.all %}
+            <div class="card mb-4">
+                <div class="card-header">{% translate "Entretiens" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for interview in application.interviews.all %}
+                        <li class="list-group-item small">
+                            <div class="fw-medium">{{ interview.scheduled_at|date:"d/m/Y H:i" }} · {{ interview.duration_minutes }} min</div>
+                            <div>{{ interview.get_mode_display }}{% if interview.location %} — {{ interview.location|urlize }}{% endif %}</div>
+                            <a href="{% url 'applications:interview_ics' interview.pk %}">.ics</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">{% translate "Historique" %}</div>
+            <div class="card-body">
+                <ul class="timeline mb-0">
+                    {% for entry in application.history.all %}
+                        <li>
+                            <div class="fw-medium">{{ entry.get_to_status_display }}</div>
+                            <div class="small text-muted">
+                                {{ entry.changed_at|date:"d/m/Y H:i" }}
+                                {% if entry.changed_by %}· {{ entry.changed_by.display_name }}{% endif %}
+                            </div>
+                            {% if entry.note %}<div class="small">{{ entry.note }}</div>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block extra_css %}
+<style>#id_content { width: 100%; } select[name="status"] { width: 100%; }</style>
+{% endblock %}

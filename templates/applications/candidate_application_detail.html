@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Ma candidature" %} — {{ application.job_offer.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:candidate_dashboard' %}">{% translate "Mon espace" %}</a></li>
+        <li class="breadcrumb-item active">{{ application.job_offer.title }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ application.job_offer.title }}</h1>
+        <p class="text-muted mb-0">
+            {{ application.job_offer.company.name }} ·
+            {% blocktranslate with date=application.applied_at|date:"d/m/Y" %}candidature envoyée le {{ date }}{% endblocktranslate %}
+        </p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        {% include "includes/status_badge.html" %}
+        <a href="{% url 'messaging:thread' application.pk %}" class="btn btn-outline-primary">{% translate "Contacter le recruteur" %}</a>
+    </div>
+</div>
+
+{% if application.status == "rejected" %}
+    <div class="alert alert-danger">{% translate "Votre candidature n'a pas été retenue. Ne vous découragez pas !" %}</div>
+{% elif application.status == "withdrawn" %}
+    <div class="alert alert-secondary">{% translate "Vous avez retiré cette candidature." %}</div>
+{% else %}
+    <div class="steps mb-4" aria-label="{% translate 'Progression' %}">
+        {% for status, label, index in pipeline %}
+            <div class="step {% if index < current_step %}done{% elif index == current_step %}current{% endif %}">{{ label }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        {% if quiz %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5 card-title">{% translate "Test technique" %} — {{ quiz.title }}</h2>
+                    {% if quiz_attempt and quiz_attempt.is_submitted %}
+                        <p class="mb-0">
+                            {% translate "Résultat" %} : <strong>{{ quiz_attempt.score }} %</strong>
+                            ({{ quiz_attempt.correct_answers }}/{{ quiz_attempt.total_questions }})
+                            {% if quiz_attempt.timed_out %}<span class="badge bg-danger ms-1">{% translate "Hors délai" %}</span>{% endif %}
+                        </p>
+                    {% elif quiz_attempt %}
+                        <p>{% translate "Test commencé." %}</p>
+                        <a href="{% url 'assessments:quiz_take' application.pk %}" class="btn btn-warning">{% translate "Reprendre le test" %}</a>
+                    {% elif not application.is_closed %}
+                        <p>{% blocktranslate with minutes=quiz.time_limit_minutes %}Ce test chronométré ({{ minutes }} minutes) fait partie du processus de recrutement.{% endblocktranslate %}</p>
+                        <a href="{% url 'assessments:quiz_start' application.pk %}" class="btn btn-warning">{% translate "Passer le test" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if application.interviews.all %}
+            <div class="card mb-4">
+                <div class="card-header">{% translate "Entretiens" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for interview in application.interviews.all %}
+                        <li class="list-group-item">
+                            <div class="fw-medium">{{ interview.scheduled_at|date:"l d F Y à H:i" }} ({{ interview.duration_minutes }} min)</div>
+                            <div class="small">{{ interview.get_mode_display }}{% if interview.location %} — {{ interview.location|urlize }}{% endif %}</div>
+                            {% if interview.notes %}<div class="small text-muted mt-1">{{ interview.notes|linebreaksbr }}</div>{% endif %}
+                            <a href="{% url 'applications:interview_ics' interview.pk %}" class="small">{% translate "Ajouter à mon agenda (.ics)" %}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if application.cover_letter %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h6 card-title">{% translate "Ma lettre de motivation" %}</h2>
+                    <p class="card-text small">{{ application.cover_letter|linebreaksbr }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if application.can_be_withdrawn %}
+            <form method="post" action="{% url 'applications:withdraw' application.pk %}"
+                  onsubmit="return confirm('{% translate "Retirer définitivement cette candidature ?" %}');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">{% translate "Retirer ma candidature" %}</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">{% translate "Historique" %}</div>
+            <div class="card-body">
+                <ul class="timeline mb-0">
+                    {% for entry in application.history.all %}
+                        <li>
+                            <div class="fw-medium">{{ entry.get_to_status_display }}</div>
+                            <div class="small text-muted">{{ entry.changed_at|date:"d/m/Y H:i" }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <p class="mt-3"><a href="{% url 'jobs:job_offer_detail' application.job_offer.pk %}">{% translate "Revoir l'offre" %}</a></p>
+    </div>
+</div>
+{% endblock %}
