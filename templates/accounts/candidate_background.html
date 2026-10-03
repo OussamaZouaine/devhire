@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Mon parcours" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{% translate "Mon parcours" %}</h1>
+    <a href="{% url 'accounts:candidate_profile_update' %}" class="btn btn-outline-secondary">← {% translate "Mon profil" %}</a>
+</div>
+<p class="text-muted">{% translate "Ces informations sont visibles par les recruteurs et améliorent votre score de compatibilité. Laissez une ligne vide pour l'ignorer." %}</p>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% include "accounts/includes/formset_table.html" with formset=experience_formset title=_("Expériences professionnelles") %}
+    {% include "accounts/includes/formset_table.html" with formset=education_formset title=_("Formation") %}
+    {% include "accounts/includes/formset_table.html" with formset=language_formset title=_("Langues") %}
+
+    <button type="submit" class="btn btn-primary">{% translate "Enregistrer mon parcours" %}</button>
+</form>
+{% endblock %}

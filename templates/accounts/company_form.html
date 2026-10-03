@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Fiche entreprise" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">{% translate "Fiche entreprise" %}</h1>
+            <a href="{{ object.get_absolute_url }}">{% translate "Voir la page publique" %} →</a>
+        </div>
+        {% if object.logo %}
+            <p><img src="{{ object.logo.url }}" alt="{{ object.name }}" class="company-logo" style="width: 96px; height: 96px;"></p>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% crispy form %}
+            <button type="submit" class="btn btn-primary">{% translate "Enregistrer" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

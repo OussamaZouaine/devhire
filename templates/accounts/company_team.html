@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Équipe" %}{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">{% translate "Équipe de recrutement" %} — {{ company.name }}</h1>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">{% translate "Membres" %}</div>
+            <ul class="list-group list-group-flush">
+                {% for member in members %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-medium">{{ member.user.display_name }} {% if member.user == user %}<span class="text-muted small">({% translate "vous" %})</span>{% endif %}</div>
+                            <div class="small text-muted">
+                                {{ member.user.email }} · {{ member.get_company_role_display }}
+                                {% if member.job_title %}· {{ member.job_title }}{% endif %}
+                                · {% blocktranslate count counter=member.offer_count %}{{ counter }} offre{% plural %}{{ counter }} offres{% endblocktranslate %}
+                            </div>
+                        </div>
+                        {% if is_admin and member.user != user %}
+                            <form method="post" action="{% url 'accounts:remove_member' member.pk %}"
+                                  onsubmit="return confirm('{% translate "Retirer ce recruteur de l'équipe ?" %}');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Retirer" %}</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if invitations %}
+            <div class="card mt-4">
+                <div class="card-header">{% translate "Invitations en attente" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for invitation in invitations %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                {{ invitation.email }} · {{ invitation.get_role_display }}
+                                <div class="small text-muted">
+                                    {% translate "Envoyée le" %} {{ invitation.created_at|date:"d/m/Y" }}
+                                    {% if invitation.is_expired %}<span class="badge bg-secondary">{% translate "Expirée" %}</span>{% endif %}
+                                </div>
+                            </div>
+                            {% if is_admin %}
+                                <form method="post" action="{% url 'accounts:cancel_invitation' invitation.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">{% translate "Annuler" %}</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+        {% if is_admin %}
+            <div class="card">
+                <div class="card-header">{% translate "Inviter un recruteur" %}</div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary">{% translate "Envoyer l'invitation" %}</button>
+                    </form>
+                    <p class="small text-muted mt-2 mb-0">{% translate "Le lien d'invitation est valable 7 jours." %}</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-light border">{% translate "Seuls les administrateurs de l'entreprise peuvent inviter ou retirer des recruteurs." %}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-3 align-items-center mb-3">
+    {% if company.logo %}
+        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="company-logo" style="width: 80px; height: 80px;">
+    {% else %}
+        <span class="company-logo-placeholder" style="width: 80px; height: 80px; font-size: 2rem;">{{ company.name|slice:":1"|upper }}</span>
+    {% endif %}
+    <div>
+        <h1 class="h2 mb-1">{{ company.name }}</h1>
+        <p class="text-muted mb-0">
+            {% if company.location %}{{ company.location }}{% endif %}
+            {% if company.website %}{% if company.location %} · {% endif %}<a href="{{ company.website }}" target="_blank" rel="noopener">{{ company.website }}</a>{% endif %}
+        </p>
+    </div>
+</div>
+
+{% if company.description %}
+    <div class="card mb-4"><div class="card-body">{{ company.description|linebreaks }}</div></div>
+{% endif %}
+
+<h2 class="h4 mb-3">
+    {% blocktranslate count counter=job_offers|length %}{{ counter }} offre ouverte{% plural %}{{ counter }} offres ouvertes{% endblocktranslate %}
+</h2>
+{% if job_offers %}
+    <div class="row g-3">
+        {% for offer in job_offers %}
+            <div class="col-md-6">{% include "includes/offer_card.html" %}</div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">{% translate "Cette entreprise n'a pas d'offre ouverte pour le moment." %}</div>
+{% endif %}
+{% endblock %}

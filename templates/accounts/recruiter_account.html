@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Mon compte" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-4">{% translate "Mon compte recruteur" %}</h1>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% crispy form %}
+            <button type="submit" class="btn btn-primary">{% translate "Enregistrer" %}</button>
+        </form>
+        <hr>
+        <p class="mb-1">
+            {% translate "Entreprise" %} : <strong>{{ user.recruiterprofile.company.name }}</strong>
+            ({{ user.recruiterprofile.get_company_role_display }})
+        </p>
+        <a href="{% url 'accounts:company_team' %}">{% translate "Voir l'équipe" %}</a>
+        {% if user.recruiterprofile.is_company_admin %} · <a href="{% url 'accounts:company_update' %}">{% translate "Modifier la fiche entreprise" %}</a>{% endif %}
+    </div>
+</div>
+{% endblock %}

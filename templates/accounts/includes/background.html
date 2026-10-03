@@ -1,0 +1,28 @@
+{% load i18n %}
+{% if profile.experiences.all %}
+    <h3 class="h6 mt-3">{% translate "Expériences" %}</h3>
+    <ul class="list-unstyled">
+        {% for exp in profile.experiences.all %}
+            <li class="mb-2">
+                <div class="fw-medium">{{ exp.title }} — {{ exp.company }}</div>
+                <div class="small text-muted">{{ exp.start_date|date:"m/Y" }} – {% if exp.end_date %}{{ exp.end_date|date:"m/Y" }}{% else %}{% translate "aujourd'hui" %}{% endif %}</div>
+                {% if exp.description %}<div class="small">{{ exp.description|linebreaksbr }}</div>{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% if profile.educations.all %}
+    <h3 class="h6 mt-3">{% translate "Formation" %}</h3>
+    <ul class="list-unstyled">
+        {% for edu in profile.educations.all %}
+            <li class="mb-1">
+                <span class="fw-medium">{{ edu.degree }}</span>{% if edu.field_of_study %} ({{ edu.field_of_study }}){% endif %} — {{ edu.school }}
+                <span class="small text-muted">{{ edu.start_year }}{% if edu.end_year %}–{{ edu.end_year }}{% endif %}</span>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% if profile.languages.all %}
+    <h3 class="h6 mt-3">{% translate "Langues" %}</h3>
+    <p class="mb-0">{% for lang in profile.languages.all %}<span class="skill-chip">{{ lang.name }} · {{ lang.get_level_display }}</span>{% endfor %}</p>
+{% endif %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ profile.user.display_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-1">{{ profile.user.display_name }}</h1>
+        <p class="text-muted">
+            {% if profile.headline %}{{ profile.headline }} · {% endif %}
+            {% if profile.location %}{{ profile.location }} · {% endif %}
+            {{ profile.years_of_experience }} {% translate "an(s) d'expérience" %}
+        </p>
+
+        {% if company_applications %}
+            <div class="alert alert-info">
+                {% translate "A postulé chez vous" %} :
+                {% for application in company_applications %}
+                    <a href="{% url 'applications:application_detail' application.pk %}" class="alert-link">{{ application.job_offer.title }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-body">
+                {% if profile.bio %}<p>{{ profile.bio|linebreaksbr }}</p>{% endif %}
+                <p>{% for skill in profile.skills.all %}<span class="skill-chip">{{ skill.name }}</span>{% empty %}<span class="text-muted small">{% translate "Aucune compétence renseignée." %}</span>{% endfor %}</p>
+                {% include "accounts/includes/background.html" %}
+            </div>
+        </div>
+        <p class="small text-muted mt-3">{% translate "Les coordonnées et le CV ne sont visibles que lorsque le candidat postule à l'une de vos offres." %}</p>
+    </div>
+</div>
+{% endblock %}

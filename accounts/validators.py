@@ -25,3 +25,15 @@ def validate_file_max_size(file, max_bytes: int = MAX_CV_SIZE_BYTES) -> None:
     if file.size > max_bytes:
         max_mb = max_bytes // (1024 * 1024)
         raise ValidationError(f"Le fichier ne doit pas dépasser {max_mb} Mo.")
+
+
+MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+
+
+def validate_image_file(file) -> None:
+    """Accept common image formats up to 2 MB."""
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValidationError("Le logo doit être une image (PNG, JPG, WEBP ou GIF).")
+    validate_file_max_size(file, MAX_LOGO_SIZE_BYTES)

@@ -1,44 +1,48 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Inscription{% endblock %}
+{% block title %}{% translate "Inscription" %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <h1 class="h3 mb-4 text-center">Créer un compte</h1>
-        <p class="text-muted text-center mb-4">Choisissez votre profil pour commencer.</p>
-        <div class="row g-3">
+    <div class="col-lg-8">
+        <div class="text-center mb-4">
+            <span class="auth-icon"><i class="bi bi-person-plus"></i></span>
+            <h1 class="h2 mb-1">{% translate "Créer un compte" %}</h1>
+            <p class="text-muted">{% translate "Choisissez votre profil pour commencer." %}</p>
+        </div>
+        <div class="row g-4">
             <div class="col-md-6">
-                <div class="card h-100 text-center">
-                    <div class="card-body d-flex flex-column">
-                        <h2 class="h5 card-title">Je suis Candidat</h2>
-                        <p class="card-text text-muted flex-grow-1">
-                            Recherchez des offres et postulez en quelques clics.
-                        </p>
-                        <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-primary">
-                            S'inscrire comme candidat
-                        </a>
+                <a href="{% url 'accounts:signup_candidate' %}" class="card choice-card card-hover h-100 text-reset">
+                    <div class="card-body p-4">
+                        <span class="stat-icon mb-3"><i class="bi bi-person-workspace"></i></span>
+                        <h2 class="h4">{% translate "Je suis Candidat" %}</h2>
+                        <p class="text-muted">{% translate "Recevez des offres adaptées à votre profil et postulez en quelques clics." %}</p>
+                        <ul class="list-unstyled small d-grid gap-2 mb-4">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Score de compatibilité pour chaque offre" %}</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Analyse automatique de votre CV" %}</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Alertes emploi et suivi en temps réel" %}</li>
+                        </ul>
+                        <span class="btn btn-primary w-100">{% translate "S'inscrire comme candidat" %}</span>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6">
-                <div class="card h-100 text-center">
-                    <div class="card-body d-flex flex-column">
-                        <h2 class="h5 card-title">Je suis Recruteur</h2>
-                        <p class="card-text text-muted flex-grow-1">
-                            Publiez des offres et gérez les candidatures reçues.
-                        </p>
-                        <a href="{% url 'accounts:signup_recruiter' %}" class="btn btn-outline-primary">
-                            S'inscrire comme recruteur
-                        </a>
+                <a href="{% url 'accounts:signup_recruiter' %}" class="card choice-card card-hover h-100 text-reset">
+                    <div class="card-body p-4">
+                        <span class="stat-icon violet mb-3"><i class="bi bi-building"></i></span>
+                        <h2 class="h4">{% translate "Je suis Recruteur" %}</h2>
+                        <p class="text-muted">{% translate "Publiez vos offres, suivez vos candidats et recrutez en équipe." %}</p>
+                        <ul class="list-unstyled small d-grid gap-2 mb-4">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Pipeline Kanban et tests techniques" %}</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Candidats classés par compatibilité" %}</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{% translate "Statistiques de recrutement" %}</li>
+                        </ul>
+                        <span class="btn btn-outline-primary w-100">{% translate "S'inscrire comme recruteur" %}</span>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
-        <p class="text-center mt-4">
-            Déjà un compte ?
-            <a href="{% url 'accounts:login' %}">Se connecter</a>
-        </p>
     </div>
 </div>
 {% endblock %}

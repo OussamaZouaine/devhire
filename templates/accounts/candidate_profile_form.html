@@ -1,27 +1,57 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags i18n %}
 
-{% block title %}Mon profil{% endblock %}
+{% block title %}{% translate "Mon profil" %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <h1 class="h3 mb-4">Mon profil candidat</h1>
-        <p class="text-muted">
-            Complétez votre profil et téléversez votre CV (PDF) pour pouvoir postuler aux offres.
-        </p>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3 mb-0">{% translate "Mon profil candidat" %}</h1>
+            <a href="{% url 'accounts:candidate_background' %}" class="btn btn-outline-primary">{% translate "Mon parcours" %} →</a>
+        </div>
+
+        <div class="mb-4">
+            <div class="d-flex justify-content-between small text-muted">
+                <span>{% translate "Profil complété" %}</span><span>{{ object.completion_percent }} %</span>
+            </div>
+            <div class="progress" style="height: 8px;" role="progressbar" aria-valuenow="{{ object.completion_percent }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" style="width: {{ object.completion_percent }}%"></div>
+            </div>
+        </div>
+
+        {% if suggested_skills %}
+            <div class="card border-success mb-4">
+                <div class="card-body">
+                    <h2 class="h6 card-title">{% translate "Compétences détectées dans votre CV" %}</h2>
+                    <p class="small text-muted">{% translate "Sélectionnez celles à ajouter à votre profil." %}</p>
+                    <form method="post" action="{% url 'accounts:add_suggested_skills' %}">
+                        {% csrf_token %}
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for skill in suggested_skills %}
+                                <input type="checkbox" class="btn-check" name="skills" value="{{ skill }}" id="sk-{{ forloop.counter }}" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-outline-success" for="sk-{{ forloop.counter }}">{{ skill }}</label>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">{% translate "Ajouter à mes compétences" %}</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
 
         {% if object.cv %}
             <div class="alert alert-success">
-                CV actuel enregistré : {{ object.cv.name|cut:"cvs/user_" }}
+                {% translate "CV actuel enregistré" %} : {{ object.cv.name|cut:"cvs/user_" }}
+                {% if object.cv_text %}<span class="small text-muted">· {% translate "texte analysé pour le matching" %}</span>{% endif %}
             </div>
         {% endif %}
 
         <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             {% crispy form %}
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="submit" class="btn btn-primary">{% translate "Enregistrer" %}</button>
         </form>
+        {% include "includes/skill_datalist.html" %}
     </div>
 </div>
 {% endblock %}
