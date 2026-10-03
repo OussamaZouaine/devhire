@@ -1,0 +1,37 @@
+{% load i18n %}
+<a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+   aria-label="{% translate 'Notifications' %}">
+    <i class="bi bi-bell fs-5"></i>
+    {% if unread_count %}<span class="notification-dot">{{ unread_count }}</span>{% endif %}
+    <span class="d-lg-none ms-2">{% translate "Notifications" %}</span>
+</a>
+<div class="dropdown-menu dropdown-menu-end notification-menu p-0">
+    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+        <span class="fw-bold small">{% translate "Notifications" %}</span>
+        {% if unread_count %}
+            <button class="btn btn-link btn-sm p-0" hx-post="{% url 'messaging:mark_all_read' %}" hx-target="#notification-bell" hx-swap="innerHTML">
+                {% translate "Tout marquer comme lu" %}
+            </button>
+        {% endif %}
+    </div>
+    {% if unread_messages %}
+        <a class="dropdown-item small py-2 border-bottom" href="{% url 'messaging:inbox' %}">
+            <i class="bi bi-chat-dots text-primary me-2"></i>
+            {% blocktranslate count counter=unread_messages %}{{ counter }} message non lu{% plural %}{{ counter }} messages non lus{% endblocktranslate %}
+        </a>
+    {% endif %}
+    <div class="p-1">
+        {% for notification in latest %}
+            <a class="dropdown-item small py-2 text-wrap d-flex gap-2 {% if not notification.is_read %}fw-semibold{% endif %}" href="{% url 'messaging:open_notification' notification.pk %}">
+                <i class="bi {% if notification.kind == 'message' %}bi-chat-dots{% elif notification.kind == 'interview' %}bi-calendar-event{% elif notification.kind == 'application_received' %}bi-inbox{% elif notification.kind == 'job_alert' %}bi-lightning{% elif notification.kind == 'invitation' %}bi-person-plus{% else %}bi-arrow-repeat{% endif %} text-primary"></i>
+                <span>
+                    {{ notification.title }}
+                    <span class="d-block text-muted fw-normal">{{ notification.created_at|timesince }}</span>
+                </span>
+            </a>
+        {% empty %}
+            <span class="dropdown-item-text small text-muted py-3 d-block text-center">{% translate "Aucune notification." %}</span>
+        {% endfor %}
+    </div>
+    <a class="dropdown-item small text-center border-top py-2 rounded-0" href="{% url 'messaging:notifications' %}">{% translate "Tout voir" %}</a>
+</div>

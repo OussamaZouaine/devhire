@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Conversation" %} — {{ application.job_offer.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'messaging:inbox' %}">{% translate "Messagerie" %}</a></li>
+                <li class="breadcrumb-item active">{{ application.job_offer.title }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h4 mb-0">
+                {% if user.role == "candidate" %}{{ application.job_offer.company.name }}{% else %}{{ application.candidate.user.display_name }}{% endif %}
+            </h1>
+            {% if user.role == "candidate" %}
+                <a href="{% url 'applications:candidate_application_detail' application.pk %}" class="small">{% translate "Voir ma candidature" %}</a>
+            {% else %}
+                <a href="{% url 'applications:application_detail' application.pk %}" class="small">{% translate "Voir la candidature" %}</a>
+            {% endif %}
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body thread" id="thread"
+                 hx-get="{% url 'messaging:thread_messages' application.pk %}"
+                 hx-trigger="every 5s"
+                 hx-swap="innerHTML">
+                {% include "messaging/partials/messages.html" %}
+            </div>
+        </div>
+
+        <form method="post"
+              hx-post="{% url 'messaging:thread' application.pk %}"
+              hx-target="#thread"
+              hx-swap="innerHTML"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+            {% csrf_token %}
+            <div class="input-group">
+                <textarea name="body" class="form-control" rows="2" maxlength="{{ max_length }}" required
+                          placeholder="{% translate 'Votre message...' %}"></textarea>
+                <button type="submit" class="btn btn-primary">{% translate "Envoyer" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const thread = document.getElementById("thread");
+    const scroll = () => { thread.scrollTop = thread.scrollHeight; };
+    scroll();
+    thread.addEventListener("htmx:afterSwap", scroll);
+})();
+</script>
+{% endblock %}

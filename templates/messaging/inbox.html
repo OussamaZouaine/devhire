@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Messagerie" %}{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">{% translate "Messagerie" %}</h1>
+
+{% if conversations %}
+    <div class="list-group">
+        {% for application in conversations %}
+            <a href="{% url 'messaging:thread' application.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-medium">
+                        {% if user.role == "candidate" %}{{ application.job_offer.company.name }}{% else %}{{ application.candidate.user.display_name }}{% endif %}
+                    </div>
+                    <div class="small text-muted">{{ application.job_offer.title }} · {{ application.last_message_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% if application.unread %}<span class="badge bg-danger rounded-pill">{{ application.unread }}</span>{% endif %}
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        {% translate "Aucune conversation. Vous pouvez écrire au recruteur ou au candidat depuis la page d'une candidature." %}
+    </div>
+{% endif %}
+{% endblock %}

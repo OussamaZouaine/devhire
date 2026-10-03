@@ -1,0 +1,12 @@
+{% load i18n %}
+{% for message in thread_messages %}
+    <div class="mb-2 d-flex flex-column">
+        <div class="bubble {% if message.sender_id == user.pk %}mine{% else %}theirs{% endif %}">{{ message.body }}</div>
+        <div class="small text-muted {% if message.sender_id == user.pk %}text-end{% endif %}">
+            {{ message.sender.display_name }} · {{ message.created_at|date:"d/m H:i" }}
+            {% if message.sender_id == user.pk and message.read_at %}· {% translate "lu" %}{% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p class="text-muted text-center my-4">{% translate "Aucun message. Démarrez la conversation !" %}</p>
+{% endfor %}

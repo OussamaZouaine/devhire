@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Notifications" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{% translate "Notifications" %}</h1>
+    <form method="post" action="{% url 'messaging:mark_all_read' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-secondary">{% translate "Tout marquer comme lu" %}</button>
+    </form>
+</div>
+
+{% if notifications %}
+    <div class="list-group">
+        {% for notification in notifications %}
+            <a href="{% url 'messaging:open_notification' notification.pk %}"
+               class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-primary{% endif %}">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-medium">{{ notification.title }}</span>
+                    <span class="small text-muted">{{ notification.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                {% if notification.body %}<div class="small text-muted">{{ notification.body|truncatechars:200|linebreaksbr }}</div>{% endif %}
+            </a>
+        {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+{% else %}
+    <div class="alert alert-info">{% translate "Aucune notification." %}</div>
+{% endif %}
+{% endblock %}
