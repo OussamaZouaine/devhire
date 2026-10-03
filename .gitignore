@@ -37,3 +37,7 @@ Thumbs.db
 
 # Local plan doc (remove this line to include in the repo)
 DevHire_Plan_Django.md
+
+# Tests
+.coverage
+htmlcov/

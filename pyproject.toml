@@ -1,0 +1,36 @@
+[project]
+name = "devhire"
+version = "2.0.0"
+description = "Plateforme de recrutement Django — projet académique"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["*/migrations/*", "venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM"]
+ignore = ["DJ001", "DJ008", "DJ012", "SIM108"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "accounts", "analytics", "api", "applications", "assessments",
+    "config", "core", "jobs", "matching", "messaging",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "venv/*",
+    "*/migrations/*",
+    "config/asgi.py",
+    "config/wsgi.py",
+    "manage.py",
+    "*/tests.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80
