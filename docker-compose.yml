@@ -1,0 +1,71 @@
+# Full stack: Django (gunicorn) + PostgreSQL + Redis + Celery worker + Celery beat.
+#   docker compose up --build
+#   docker compose exec web python manage.py seed_demo_data
+#   docker compose exec web python manage.py createsuperuser
+# App: http://localhost:8000
+
+x-app: &app
+  build: .
+  env_file:
+    - path: .env
+      required: false
+  environment: &app-env
+    SECRET_KEY: ${SECRET_KEY:-docker-dev-secret-key-change-me}
+    DEBUG: ${DEBUG:-False}
+    ALLOWED_HOSTS: localhost,127.0.0.1
+    CSRF_TRUSTED_ORIGINS: http://localhost:8000
+    SITE_URL: http://localhost:8000
+    DATABASE_URL: postgres://devhire:devhire@db:5432/devhire
+    CELERY_BROKER_URL: redis://redis:6379/0
+  volumes:
+    - media:/app/media
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *app
+    environment:
+      <<: *app-env
+      RUN_MIGRATIONS: "1"
+    ports:
+      - "8000:8000"
+
+  worker:
+    <<: *app
+    command: celery -A config worker --loglevel=info
+
+  beat:
+    <<: *app
+    command: celery -A config beat --loglevel=info --schedule /tmp/celerybeat-schedule
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: devhire
+      POSTGRES_USER: devhire
+      POSTGRES_PASSWORD: devhire
+    ports:
+      - "5433:5432"  # accessible depuis l'hôte pour le développement local
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devhire -d devhire"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres:
+  media:
