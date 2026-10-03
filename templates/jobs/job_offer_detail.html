@@ -1,103 +1,156 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}{{ job_offer.title }}{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row g-4">
     <div class="col-lg-8">
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% translate "Accueil" %}</a></li>
+                <li class="breadcrumb-item"><a href="{{ job_offer.company.get_absolute_url }}">{{ job_offer.company.name }}</a></li>
                 <li class="breadcrumb-item active">{{ job_offer.title }}</li>
             </ol>
         </nav>
 
-        <h1 class="h2 mb-2">{{ job_offer.title }}</h1>
+        <div class="d-flex gap-3 align-items-start mb-3">
+            {% include "includes/company_logo.html" with company=job_offer.company %}
+            <div>
+                <h1 class="h2 mb-1">{{ job_offer.title }}</h1>
+                <p class="text-muted mb-0">
+                    <a href="{{ job_offer.company.get_absolute_url }}" class="text-reset fw-semibold">{{ job_offer.company.name }}</a>
+                    · {{ job_offer.location }}
+                    · {% blocktranslate with date=job_offer.created_at|date:"d/m/Y" %}publiée le {{ date }}{% endblocktranslate %}
+                </p>
+            </div>
+        </div>
 
         {% if not job_offer.is_active %}
             <div class="alert alert-secondary">
-                Cette offre n'est plus active.
-                {% if has_applied %}
-                    Vous avez postulé avant sa désactivation.
-                {% endif %}
+                {% translate "Cette offre n'est plus active." %}
+                {% if has_applied %}{% translate "Vous avez postulé avant sa désactivation." %}{% endif %}
             </div>
+        {% elif job_offer.is_expired %}
+            <div class="alert alert-secondary">{% translate "La date limite de candidature est dépassée." %}</div>
         {% endif %}
 
-        <p class="text-muted mb-4">
-            <strong>{{ job_offer.recruiter.company_name }}</strong>
-            · {{ job_offer.location }}
-            · {{ job_offer.get_contract_type_display }}
-        </p>
-
-        {% if job_offer.salary_min or job_offer.salary_max %}
-            <p class="mb-3">
-                <span class="badge bg-light text-dark border">
-                    Salaire :
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <span class="chip chip-primary"><i class="bi bi-briefcase"></i>{{ job_offer.get_contract_type_display }}</span>
+            <span class="chip"><i class="bi bi-geo-alt"></i>{{ job_offer.location }}</span>
+            <span class="chip"><i class="bi bi-laptop"></i>{{ job_offer.get_remote_policy_display }}</span>
+            <span class="chip"><i class="bi bi-bar-chart-steps"></i>{{ job_offer.get_experience_level_display }}</span>
+            {% if job_offer.salary_min or job_offer.salary_max %}
+                <span class="chip">
+                    <i class="bi bi-cash-stack"></i>
                     {% if job_offer.salary_min %}{{ job_offer.salary_min }} €{% endif %}
                     {% if job_offer.salary_min and job_offer.salary_max %} — {% endif %}
                     {% if job_offer.salary_max %}{{ job_offer.salary_max }} €{% endif %}
                 </span>
-            </p>
-        {% endif %}
+            {% endif %}
+            {% if job_offer.deadline %}
+                <span class="chip"><i class="bi bi-calendar-event"></i>{% translate "Date limite" %} : {{ job_offer.deadline|date:"d/m/Y" }}</span>
+            {% endif %}
+            {% if has_quiz %}
+                <span class="chip" style="background:#fffbeb;color:#92400e;border-color:#fde68a;"><i class="bi bi-ui-checks"></i>{% translate "Test technique" %}</span>
+            {% endif %}
+        </div>
 
         <div class="card mb-4">
             <div class="card-body">
-                <h2 class="h5 card-title">Description</h2>
-                <p class="card-text">{{ job_offer.description|linebreaks }}</p>
+                <h2 class="h5 card-title">{% translate "Description" %}</h2>
+                <div class="card-text">{{ job_offer.description|linebreaks }}</div>
             </div>
         </div>
 
-        {% if job_offer.keywords %}
+        {% if job_offer.skills.all %}
+            <h2 class="h6">{% translate "Compétences requises" %}</h2>
             <p>
-                <strong>Mots-clés :</strong>
-                <span class="text-muted">{{ job_offer.keywords }}</span>
+                {% for skill in job_offer.skills.all %}
+                    <a href="{% url 'core:home' %}?skill={{ skill.name|urlencode }}"
+                       class="skill-chip text-decoration-none {% if match %}{% if skill.name in match.matched_skills %}matched{% else %}missing{% endif %}{% endif %}">{{ skill.name }}</a>
+                {% endfor %}
             </p>
+        {% endif %}
+
+        {% if job_offer.company.description %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5 card-title">{% blocktranslate with name=job_offer.company.name %}À propos de {{ name }}{% endblocktranslate %}</h2>
+                    <p class="card-text">{{ job_offer.company.description|truncatewords:60|linebreaksbr }}</p>
+                    <a href="{{ job_offer.company.get_absolute_url }}">{% translate "Voir toutes les offres de l'entreprise" %}</a>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if similar_offers %}
+            <h2 class="h5 mt-4">{% translate "Offres similaires" %}</h2>
+            <div class="list-group mb-4">
+                {% for offer in similar_offers %}
+                    <a href="{% url 'jobs:job_offer_detail' offer.pk %}" class="list-group-item list-group-item-action">
+                        <div class="fw-medium">{{ offer.title }}</div>
+                        <div class="small text-muted">{{ offer.company.name }} · {{ offer.location }} · {{ offer.get_contract_type_display }}</div>
+                    </a>
+                {% endfor %}
+            </div>
         {% endif %}
     </div>
 
     <div class="col-lg-4">
-        <div class="card sticky-top" style="top: 1rem;">
+        <div class="card sticky-top shadow" style="top: 5.5rem;">
             <div class="card-body">
-                <h2 class="h5 card-title">Postuler</h2>
-
-                {% if user.is_authenticated %}
-                    {% if user.role == "candidate" %}
-                        {% if has_applied %}
-                            <div class="alert alert-info mb-0">
-                                Vous avez déjà postulé à cette offre.
-                                <a href="{% url 'core:candidate_dashboard' %}">Voir mes candidatures</a>
-                            </div>
-                        {% elif missing_cv %}
-                            <div class="alert alert-warning mb-3">
-                                Téléversez votre CV pour postuler.
-                            </div>
-                            <a
-                                href="{% url 'accounts:candidate_profile_update' %}"
-                                class="btn btn-primary w-100"
-                            >
-                                Compléter mon profil
-                            </a>
-                        {% else %}
-                            <a
-                                href="{% url 'applications:apply_to_job' job_offer.pk %}"
-                                class="btn btn-primary w-100"
-                            >
-                                Postuler rapidement
-                            </a>
+                {% if can_manage %}
+                    <h2 class="h5 card-title">{% translate "Gérer l'offre" %}</h2>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'applications:pipeline' job_offer.pk %}" class="btn btn-primary">{% translate "Candidatures (Kanban)" %}</a>
+                        <a href="{% url 'jobs:job_offer_update' job_offer.pk %}" class="btn btn-outline-primary">{% translate "Modifier" %}</a>
+                        <a href="{% url 'assessments:quiz_manage' job_offer.pk %}" class="btn btn-outline-secondary">{% translate "Test technique (QCM)" %}</a>
+                    </div>
+                {% elif user.is_authenticated and user.role == "candidate" %}
+                    {% if match %}
+                        <h2 class="h6 card-title">{% translate "Votre compatibilité" %}</h2>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="stat-value">{{ match.score }} %</div>
+                            {% include "includes/match_badge.html" %}
+                        </div>
+                        <div class="small text-muted mb-1">{% translate "Compétences" %} : {{ match.skill_score }} %</div>
+                        <div class="progress mb-2" style="height: 6px;"><div class="progress-bar bg-success" style="width: {{ match.skill_score }}%"></div></div>
+                        <div class="small text-muted mb-1">{% translate "Similarité du profil" %} : {{ match.text_score }} %</div>
+                        <div class="progress mb-3" style="height: 6px;"><div class="progress-bar" style="width: {{ match.text_score }}%"></div></div>
+                        {% if match.missing_skills %}
+                            <p class="small mb-3">{% translate "Compétences manquantes" %} :
+                                {% for skill in match.missing_skills %}<span class="skill-chip missing">{{ skill }}</span>{% endfor %}
+                            </p>
                         {% endif %}
-                    {% else %}
-                        <p class="text-muted mb-0">
-                            Connectez-vous avec un compte candidat pour postuler.
-                        </p>
+                        <hr>
                     {% endif %}
+
+                    {% if has_applied %}
+                        <div class="alert alert-info mb-2">
+                            {% translate "Vous avez déjà postulé à cette offre." %}
+                            <div class="mt-1">{% include "includes/status_badge.html" %}</div>
+                        </div>
+                        <a href="{% url 'applications:candidate_application_detail' application.pk %}" class="btn btn-outline-primary w-100">{% translate "Suivre ma candidature" %}</a>
+                    {% elif missing_cv %}
+                        <div class="alert alert-warning mb-3">{% translate "Téléversez votre CV pour postuler." %}</div>
+                        <a href="{% url 'accounts:candidate_profile_update' %}" class="btn btn-primary w-100">{% translate "Compléter mon profil" %}</a>
+                    {% elif can_apply %}
+                        <a href="{% url 'applications:apply_to_job' job_offer.pk %}" class="btn btn-gradient w-100 py-2"><i class="bi bi-send me-1"></i>{% translate "Postuler" %}</a>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'jobs:toggle_saved_job' job_offer.pk %}" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if is_saved %}btn-danger{% else %}btn-outline-danger{% endif %} w-100">
+                            <i class="bi {% if is_saved %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i>{% if is_saved %}{% translate "Retirer des favoris" %}{% else %}{% translate "Ajouter aux favoris" %}{% endif %}
+                        </button>
+                    </form>
+                {% elif user.is_authenticated %}
+                    <p class="text-muted mb-0">{% translate "Connectez-vous avec un compte candidat pour postuler." %}</p>
                 {% else %}
-                    <p class="text-muted">Connectez-vous pour postuler à cette offre.</p>
-                    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 mb-2">
-                        Se connecter
-                    </a>
-                    <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-outline-primary w-100">
-                        Créer un compte candidat
-                    </a>
+                    <h2 class="h5 card-title">{% translate "Postuler" %}</h2>
+                    <p class="text-muted">{% translate "Connectez-vous pour postuler à cette offre." %}</p>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="btn btn-primary w-100 mb-2">{% translate "Se connecter" %}</a>
+                    <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-outline-primary w-100">{% translate "Créer un compte candidat" %}</a>
                 {% endif %}
             </div>
         </div>

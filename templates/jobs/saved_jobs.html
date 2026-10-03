@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Mes favoris" %}{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">{% translate "Mes offres favorites" %}</h1>
+
+{% if saved_jobs %}
+    <div class="list-group">
+        {% for saved in saved_jobs %}
+            {% with offer=saved.job_offer %}
+                <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                    <div>
+                        <a href="{% url 'jobs:job_offer_detail' offer.pk %}" class="fw-medium">{{ offer.title }}</a>
+                        <div class="small text-muted">
+                            {{ offer.company.name }} · {{ offer.location }} · {{ offer.get_contract_type_display }}
+                            {% if not offer.is_open %}<span class="badge bg-secondary ms-1">{% translate "Clôturée" %}</span>{% endif %}
+                        </div>
+                        <div class="small text-muted">{% translate "Ajoutée le" %} {{ saved.created_at|date:"d/m/Y" }}</div>
+                    </div>
+                    <form method="post" action="{% url 'jobs:toggle_saved_job' offer.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'jobs:saved_jobs' %}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Retirer" %}</button>
+                    </form>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        {% translate "Vous n'avez aucune offre en favori." %}
+        <a href="{% url 'core:home' %}" class="alert-link">{% translate "Parcourir les offres" %}</a>
+    </div>
+{% endif %}
+{% endblock %}

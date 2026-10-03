@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Alerte emploi" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-4">{% if object %}{% translate "Modifier l'alerte" %}{% else %}{% translate "Nouvelle alerte emploi" %}{% endif %}</h1>
+        {% crispy form %}
+        <p class="mt-3"><a href="{% url 'jobs:job_alert_list' %}">← {% translate "Retour à mes alertes" %}</a></p>
+    </div>
+</div>
+{% endblock %}

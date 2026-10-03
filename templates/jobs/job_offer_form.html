@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags i18n %}
 
 {% block title %}{{ form_title }}{% endblock %}
 
@@ -11,8 +11,9 @@
             {% csrf_token %}
             {% crispy form %}
         </form>
+        {% include "includes/skill_datalist.html" %}
         <p class="mt-3">
-            <a href="{% url 'jobs:recruiter_dashboard' %}">← Retour à mes offres</a>
+            <a href="{% url 'jobs:recruiter_dashboard' %}">← {% translate "Retour à mes offres" %}</a>
         </p>
     </div>
 </div>

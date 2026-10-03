@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Mes alertes" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{% translate "Mes alertes emploi" %}</h1>
+    <a href="{% url 'jobs:job_alert_create' %}" class="btn btn-primary">+ {% translate "Nouvelle alerte" %}</a>
+</div>
+<p class="text-muted">{% translate "Chaque jour, les nouvelles offres correspondant à vos alertes vous sont envoyées par email et en notification." %}</p>
+
+{% if alerts %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>{% translate "Nom" %}</th>
+                    <th>{% translate "Critères" %}</th>
+                    <th>{% translate "Statut" %}</th>
+                    <th>{% translate "Dernier envoi" %}</th>
+                    <th class="text-end">{% translate "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alert in alerts %}
+                    <tr>
+                        <td class="fw-medium">{{ alert.name }}</td>
+                        <td class="small">
+                            {% if alert.query %}« {{ alert.query }} » {% endif %}
+                            {% if alert.location %}· {{ alert.location }} {% endif %}
+                            {% if alert.contract_type %}· {{ alert.get_contract_type_display }} {% endif %}
+                            {% if alert.remote_policy %}· {{ alert.get_remote_policy_display }} {% endif %}
+                            {% if alert.salary_min %}· ≥ {{ alert.salary_min }} €{% endif %}
+                        </td>
+                        <td>{% if alert.is_active %}<span class="badge bg-success">{% translate "Active" %}</span>{% else %}<span class="badge bg-secondary">{% translate "En pause" %}</span>{% endif %}</td>
+                        <td class="small">{{ alert.last_sent_at|date:"d/m/Y H:i"|default:"—" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'core:home' %}?{% for key, value in alert.as_search_params.items %}{{ key }}={{ value|urlencode }}&{% endfor %}" class="btn btn-sm btn-outline-secondary">{% translate "Voir" %}</a>
+                            <a href="{% url 'jobs:job_alert_update' alert.pk %}" class="btn btn-sm btn-outline-primary">{% translate "Modifier" %}</a>
+                            <a href="{% url 'jobs:job_alert_delete' alert.pk %}" class="btn btn-sm btn-outline-danger">{% translate "Supprimer" %}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">{% translate "Aucune alerte pour le moment." %}</div>
+{% endif %}
+{% endblock %}
