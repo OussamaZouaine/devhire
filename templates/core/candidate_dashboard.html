@@ -1,54 +1,136 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Mes candidatures{% endblock %}
+{% block title %}{% translate "Mon espace" %}{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
-    <h1 class="h3 mb-0">Mes candidatures</h1>
-    <a href="{% url 'accounts:candidate_profile_update' %}" class="btn btn-outline-primary">
-        Mon profil / CV
-    </a>
+<div class="page-header">
+    <div>
+        <h1 class="h3">{% blocktranslate with name=user.display_name %}Bonjour {{ name }}{% endblocktranslate %}</h1>
+        <p class="subtitle">{% translate "Suivez vos candidatures et découvrez les offres faites pour vous." %}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'accounts:candidate_profile_update' %}" class="btn btn-outline-primary"><i class="bi bi-person me-1"></i>{% translate "Mon profil / CV" %}</a>
+        <a href="{% url 'core:home' %}" class="btn btn-primary"><i class="bi bi-search me-1"></i>{% translate "Chercher des offres" %}</a>
+    </div>
 </div>
 
-{% if applications %}
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Offre</th>
-                    <th>Entreprise</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for application in applications %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'jobs:job_offer_detail' application.job_offer.pk %}">
-                                {{ application.job_offer.title }}
-                            </a>
-                        </td>
-                        <td>{{ application.job_offer.recruiter.company_name }}</td>
-                        <td>{{ application.applied_at|date:"d/m/Y" }}</td>
-                        <td>
-                            {% if application.status == "pending" %}
-                                <span class="badge bg-warning text-dark">En attente</span>
-                            {% elif application.status == "accepted" %}
-                                <span class="badge bg-success">Acceptée</span>
-                            {% else %}
-                                <span class="badge bg-danger">Refusée</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">{% translate "Candidatures" as label %}{% include "includes/stat_card.html" with icon="bi-send" value=stats.total %}</div>
+    <div class="col-6 col-lg-3">{% translate "En cours" as label %}{% include "includes/stat_card.html" with icon="bi-hourglass-split" tone="amber" value=stats.in_progress %}</div>
+    <div class="col-6 col-lg-3">{% translate "Favoris" as label %}{% url 'jobs:saved_jobs' as saved_url %}{% include "includes/stat_card.html" with icon="bi-heart" tone="rose" value=saved_count url=saved_url %}</div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <span class="stat-icon green"><i class="bi bi-person-check"></i></span>
+                <div class="flex-grow-1">
+                    <div class="stat-label">{% translate "Profil complété" %}</div>
+                    <div class="stat-value">{{ profile.completion_percent }} %</div>
+                    <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ profile.completion_percent }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {{ profile.completion_percent }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-{% else %}
-    <div class="alert alert-info">
-        Vous n'avez pas encore postulé à une offre.
-        <a href="{% url 'core:home' %}" class="alert-link">Parcourir les offres</a>.
+</div>
+
+{% if profile.completion_percent < 100 %}
+    <div class="alert alert-light border">
+        {% translate "Un profil complet (compétences, expériences, CV) améliore la qualité de vos recommandations." %}
+        <a href="{% url 'accounts:candidate_profile_update' %}" class="alert-link">{% translate "Compléter mon profil" %}</a>
+        · <a href="{% url 'accounts:candidate_background' %}" class="alert-link">{% translate "Mon parcours" %}</a>
     </div>
 {% endif %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <h2 class="h5 mb-3">{% translate "Mes candidatures" %}</h2>
+        {% if applications %}
+            <div class="table-card table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>{% translate "Offre" %}</th>
+                            <th>{% translate "Entreprise" %}</th>
+                            <th>{% translate "Date" %}</th>
+                            <th>{% translate "Compatibilité" %}</th>
+                            <th>{% translate "Statut" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'applications:candidate_application_detail' application.pk %}">{{ application.job_offer.title }}</a>
+                                    {% if application.job_offer.quiz.is_ready and not application.quiz_attempt %}
+                                        <span class="badge bg-warning text-dark ms-1">{% translate "Test à passer" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ application.job_offer.company.name }}</td>
+                                <td>{{ application.applied_at|date:"d/m/Y" }}</td>
+                                <td>{% if application.match_score is not None %}{{ application.match_score }} %{% else %}—{% endif %}</td>
+                                <td>{% include "includes/status_badge.html" %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "includes/pagination.html" %}
+        {% else %}
+            <div class="alert alert-info">
+                {% translate "Vous n'avez pas encore postulé à une offre." %}
+                <a href="{% url 'core:home' %}" class="alert-link">{% translate "Parcourir les offres" %}</a>.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        {% if upcoming_interviews %}
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-calendar-event text-primary me-2"></i>{% translate "Entretiens à venir" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for interview in upcoming_interviews %}
+                        <li class="list-group-item">
+                            <div class="fw-medium">{{ interview.scheduled_at|date:"l d/m/Y H:i" }}</div>
+                            <div class="small text-muted">{{ interview.application.job_offer.title }} — {{ interview.application.job_offer.company.name }}</div>
+                            <a href="{% url 'applications:interview_ics' interview.pk %}" class="small">{% translate "Ajouter à mon agenda (.ics)" %}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header"><i class="bi bi-stars text-primary me-2"></i>{% translate "Recommandées pour vous" %}</div>
+            {% if recommendations %}
+                <ul class="list-group list-group-flush">
+                    {% for offer, match in recommendations %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between gap-2">
+                                <a href="{% url 'jobs:job_offer_detail' offer.pk %}" class="fw-medium">{{ offer.title }}</a>
+                                {% include "includes/match_badge.html" %}
+                            </div>
+                            <div class="small text-muted">{{ offer.company.name }} · {{ offer.location }}</div>
+                            {% if match.matched_skills %}
+                                <div class="mt-1">
+                                    {% for skill in match.matched_skills|slice:":4" %}<span class="skill-chip matched">{{ skill }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="card-body small text-muted">
+                    {% translate "Ajoutez des compétences à votre profil pour recevoir des recommandations personnalisées." %}
+                </div>
+            {% endif %}
+        </div>
+
+        <p class="small text-muted mt-3">
+            {% blocktranslate count counter=alert_count %}{{ counter }} alerte emploi active{% plural %}{{ counter }} alertes emploi actives{% endblocktranslate %}
+            — <a href="{% url 'jobs:job_alert_list' %}">{% translate "Gérer" %}</a>
+        </p>
+    </div>
+</div>
 {% endblock %}

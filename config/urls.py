@@ -9,10 +9,16 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("i18n/", include("django.conf.urls.i18n")),
     path("", include("core.urls")),
     path("compte/", include("accounts.urls")),
+    path("auth/", include("allauth.urls")),
     path("offres/", include("jobs.urls")),
     path("candidatures/", include("applications.urls")),
+    path("tests/", include("assessments.urls")),
+    path("messagerie/", include("messaging.urls")),
+    path("statistiques/", include("analytics.urls")),
+    path("api/", include("api.urls")),
 ]
 
 if settings.DEBUG:

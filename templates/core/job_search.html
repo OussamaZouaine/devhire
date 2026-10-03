@@ -1,172 +1,138 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Rechercher une offre{% endblock %}
+{% block title %}{% translate "Rechercher une offre" %}{% endblock %}
 
 {% block content %}
-<div class="text-center mb-4">
-    <h1 class="display-6 fw-bold">Trouvez votre prochain poste</h1>
-    <p class="text-muted">
-        Parcourez les offres actives et postulez en quelques clics.
+<section class="hero text-center">
+    <span class="hero-badge mb-3"><i class="bi bi-stars"></i>{% translate "Matching intelligent candidat ↔ offre" %}</span>
+    <h1 class="mb-2">{% translate "Trouvez votre prochain poste" %}</h1>
+    <p class="mb-0 mx-auto" style="max-width: 640px;">
+        {% translate "Parcourez les offres actives et postulez en quelques clics." %}
+        {% if user.is_authenticated and user.role == "candidate" %}
+            {% translate "Le pourcentage indique votre compatibilité avec chaque offre." %}
+        {% endif %}
     </p>
-</div>
+</section>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
+<div class="card search-panel mb-4 mx-lg-4">
+    <div class="card-body p-3 p-md-4">
         <form method="get" action="{% url 'core:home' %}" class="row g-3 align-items-end">
             <div class="col-md-5">
-                <label for="search-q" class="form-label">Mots-clés</label>
-                <input
-                    type="search"
-                    name="q"
-                    id="search-q"
-                    class="form-control"
-                    placeholder="Titre, compétences, description..."
-                    value="{{ search_q }}"
-                >
+                <label for="search-q" class="form-label">{% translate "Mots-clés" %}</label>
+                <div class="input-icon"><i class="bi bi-search"></i>
+                <input type="search" name="q" id="search-q" class="form-control"
+                       placeholder="{% translate 'Titre, compétences, entreprise...' %}" value="{{ filters.q|default:'' }}"></div>
             </div>
             <div class="col-md-3">
-                <label for="search-location" class="form-label">Localisation</label>
-                <input
-                    type="search"
-                    name="location"
-                    id="search-location"
-                    class="form-control"
-                    placeholder="Paris, Lyon, Remote..."
-                    value="{{ search_location }}"
-                >
+                <label for="search-location" class="form-label">{% translate "Localisation" %}</label>
+                <div class="input-icon"><i class="bi bi-geo-alt"></i>
+                <input type="search" name="location" id="search-location" class="form-control"
+                       placeholder="Paris, Lyon, Remote..." value="{{ filters.location|default:'' }}"></div>
             </div>
             <div class="col-md-2">
-                <label for="search-contract" class="form-label">Contrat</label>
+                <label for="search-contract" class="form-label">{% translate "Contrat" %}</label>
                 <select name="contract_type" id="search-contract" class="form-select">
-                    <option value="">Tous</option>
+                    <option value="">{% translate "Tous" %}</option>
                     {% for value, label in contract_types %}
-                        <option value="{{ value }}" {% if search_contract_type == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
+                        <option value="{{ value }}" {% if filters.contract_type == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Rechercher</button>
+                <button type="submit" class="btn btn-gradient w-100 py-2"><i class="bi bi-search me-1"></i>{% translate "Rechercher" %}</button>
+            </div>
+
+            <div class="col-12">
+                <a class="small fw-semibold" data-bs-toggle="collapse" href="#advanced-filters" role="button"
+                   aria-expanded="{% if has_filters %}true{% else %}false{% endif %}"><i class="bi bi-sliders me-1"></i>{% translate "Filtres avancés" %}</a>
+            </div>
+            <div class="collapse {% if filters.remote_policy or filters.experience_level or filters.salary_min or filters.skill or filters.sort %}show{% endif %} col-12" id="advanced-filters">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="search-remote" class="form-label">{% translate "Télétravail" %}</label>
+                        <select name="remote_policy" id="search-remote" class="form-select">
+                            <option value="">{% translate "Tous" %}</option>
+                            {% for value, label in remote_policies %}
+                                <option value="{{ value }}" {% if filters.remote_policy == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="search-level" class="form-label">{% translate "Expérience" %}</label>
+                        <select name="experience_level" id="search-level" class="form-select">
+                            <option value="">{% translate "Tous" %}</option>
+                            {% for value, label in experience_levels %}
+                                <option value="{{ value }}" {% if filters.experience_level == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search-salary" class="form-label">{% translate "Salaire min. (€)" %}</label>
+                        <input type="number" min="0" step="1000" name="salary_min" id="search-salary" class="form-control"
+                               value="{{ filters.salary_min|default:'' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search-skill" class="form-label">{% translate "Compétence" %}</label>
+                        <input type="text" name="skill" id="search-skill" class="form-control" value="{{ filters.skill|default:'' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search-sort" class="form-label">{% translate "Trier par" %}</label>
+                        <select name="sort" id="search-sort" class="form-select">
+                            <option value="">{% translate "Plus récentes" %}</option>
+                            {% if full_text_search %}<option value="relevance" {% if filters.sort == "relevance" %}selected{% endif %}>{% translate "Pertinence" %}</option>{% endif %}
+                            <option value="salary" {% if filters.sort == "salary" %}selected{% endif %}>{% translate "Salaire" %}</option>
+                            {% if user.is_authenticated and user.role == "candidate" %}
+                                <option value="match" {% if filters.sort == "match" %}selected{% endif %}>{% translate "Compatibilité" %}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<p class="text-muted small mb-3">
-    {% if search_q or search_location or search_contract_type %}
-        {{ total_results }} résultat{{ total_results|pluralize }} trouvé{{ total_results|pluralize }}
-        {% if search_q %} pour « {{ search_q }} »{% endif %}
-    {% else %}
-        {{ total_results }} offre{{ total_results|pluralize }} active{{ total_results|pluralize }}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <p class="text-muted mb-0 fw-semibold">
+        {% blocktranslate count counter=total_results %}{{ counter }} offre trouvée{% plural %}{{ counter }} offres trouvées{% endblocktranslate %}
+        {% if filters.q %} — « {{ filters.q }} »{% endif %}
+    </p>
+    {% if has_filters and user.is_authenticated and user.role == "candidate" %}
+        <a href="{% url 'jobs:job_alert_create' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-bell me-1"></i>{% translate "Créer une alerte pour cette recherche" %}
+        </a>
     {% endif %}
-</p>
+</div>
 
 {% if job_offers %}
     <div class="row g-3">
         {% for offer in job_offers %}
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                            <h2 class="h5 card-title mb-0">
-                                <a
-                                    href="{% url 'jobs:job_offer_detail' offer.pk %}"
-                                    class="text-decoration-none"
-                                >
-                                    {{ offer.title }}
-                                </a>
-                            </h2>
-                            <span class="badge bg-primary">{{ offer.get_contract_type_display }}</span>
-                        </div>
-                        <p class="text-muted small mb-2">
-                            <strong>{{ offer.recruiter.company_name }}</strong>
-                            · {{ offer.location }}
-                        </p>
-                        <p class="card-text small flex-grow-1">
-                            {{ offer.description|truncatewords:30 }}
-                        </p>
-                        {% if offer.keywords %}
-                            <p class="small text-muted mb-2">{{ offer.keywords }}</p>
-                        {% endif %}
-                        <a
-                            href="{% url 'jobs:job_offer_detail' offer.pk %}"
-                            class="btn btn-sm btn-outline-primary align-self-start"
-                        >
-                            Voir le détail
-                        </a>
-                    </div>
-                </div>
+                {% include "includes/offer_card.html" %}
             </div>
         {% endfor %}
     </div>
 
-    {% if is_paginated %}
-        <nav class="mt-4" aria-label="Pagination des offres">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a
-                            class="page-link"
-                            href="?{% querystring page=page_obj.previous_page_number %}"
-                        >
-                            Précédent
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Précédent</span>
-                    </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                    {% if num == page_obj.number %}
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-                        <li class="page-item">
-                            <a class="page-link" href="?{% querystring page=num %}">{{ num }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a
-                            class="page-link"
-                            href="?{% querystring page=page_obj.next_page_number %}"
-                        >
-                            Suivant
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Suivant</span>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
-    {% endif %}
+    {% include "includes/pagination.html" %}
 {% else %}
-    <div class="alert alert-info">
-        Aucune offre ne correspond à votre recherche.
-        {% if search_q or search_location or search_contract_type %}
-            <a href="{% url 'core:home' %}" class="alert-link">Réinitialiser les filtres</a>
+    <div class="empty-state">
+        <i class="bi bi-search"></i>
+        <p class="mt-2 mb-1 fw-semibold">{% translate "Aucune offre ne correspond à votre recherche." %}</p>
+        {% if has_filters %}
+            <a href="{% url 'core:home' %}">{% translate "Réinitialiser les filtres" %}</a>
         {% endif %}
     </div>
 {% endif %}
 
 {% if not user.is_authenticated %}
-    <div class="text-center mt-5 py-4 border-top">
-        <p class="text-muted mb-3">Vous cherchez un emploi ou vous recrutez ?</p>
-        <div class="d-flex gap-2 justify-content-center">
-            <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-primary">
-                S'inscrire comme candidat
-            </a>
-            <a href="{% url 'accounts:signup_recruiter' %}" class="btn btn-outline-primary">
-                S'inscrire comme recruteur
-            </a>
+    <div class="card border-0 mt-5" style="background: var(--dh-primary-soft);">
+        <div class="card-body text-center py-5">
+        <h2 class="h4 mb-3">{% translate "Vous cherchez un emploi ou vous recrutez ?" %}</h2>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="{% url 'accounts:signup_candidate' %}" class="btn btn-primary">{% translate "S'inscrire comme candidat" %}</a>
+            <a href="{% url 'accounts:signup_recruiter' %}" class="btn btn-outline-primary">{% translate "S'inscrire comme recruteur" %}</a>
+        </div>
         </div>
     </div>
 {% endif %}
