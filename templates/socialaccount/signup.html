@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Finaliser l'inscription" %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card auth-card">
+        <div class="card-body">
+            <div class="text-center">
+                <span class="auth-icon"><i class="bi {% if 'company_name' in form.fields %}bi-building{% else %}bi-person-check{% endif %}"></i></span>
+                <h1 class="h3 mb-1">{% translate "Finaliser l'inscription" %}</h1>
+                <p class="text-muted mb-4">
+                    {% if 'company_name' in form.fields %}
+                        {% translate "Votre compte Google est vérifié. Indiquez le nom de votre entreprise pour créer votre espace recruteur." %}
+                    {% else %}
+                        {% translate "Votre compte Google est vérifié. Vérifiez vos informations pour terminer." %}
+                    {% endif %}
+                </p>
+            </div>
+            <form method="post" action="{% url 'socialaccount_signup' %}" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                {{ redirect_field }}
+                <button type="submit" class="btn btn-primary w-100 py-2">{% translate "Créer mon compte" %}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

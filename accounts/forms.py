@@ -1,3 +1,4 @@
+from allauth.socialaccount.forms import SignupForm as AllauthSocialSignupForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -41,7 +42,9 @@ class CandidateProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        self.fields["cv"].help_text = (
+        self.fields[
+            "cv"
+        ].help_text = (
             "Format PDF uniquement, taille max. 5 Mo. Les compétences détectées dans votre CV vous seront suggérées."
         )
         if self.instance.pk:
@@ -234,3 +237,19 @@ class CompanyInvitationForm(forms.ModelForm):
         if RecruiterProfile.objects.filter(company=self.company, user__email__iexact=email).exists():
             raise forms.ValidationError("Ce recruteur fait déjà partie de l'entreprise.")
         return email
+
+
+class SocialSignupForm(AllauthSocialSignupForm):
+    """
+    Google sign-up form, shown only when allauth cannot create the account
+    automatically: recruiters (company name required) or a username conflict.
+    """
+
+    company_name = forms.CharField(max_length=200, label="Nom de l'entreprise")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.sociallogin.user.role != User.Role.RECRUITER:
+            del self.fields["company_name"]
+        self.helper = FormHelper()
+        self.helper.form_tag = False

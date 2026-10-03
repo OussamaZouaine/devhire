@@ -17,6 +17,11 @@ urlpatterns = [
         views.RecruiterSignUpView.as_view(),
         name="signup_recruiter",
     ),
+    path(
+        "inscription/google/<str:role>/",
+        views.GoogleSignUpView.as_view(),
+        name="google_signup",
+    ),
     path("connexion/", views.LoginView.as_view(), name="login"),
     path("deconnexion/", views.LogoutView.as_view(), name="logout"),
     # Password reset

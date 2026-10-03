@@ -4,6 +4,7 @@ from django.contrib.auth import login
 from django.contrib.auth import views as auth_views
 from django.db import transaction
 from django.db.models import Count, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -17,6 +18,7 @@ from matching.models import Skill
 from messaging.models import Notification
 from messaging.services import notify
 
+from .adapters import SIGNUP_ROLE_SESSION_KEY
 from .forms import (
     CandidateProfileForm,
     CandidateSignUpForm,
@@ -65,6 +67,18 @@ class RecruiterSignUpView(CreateView):
         login(self.request, user, backend=AUTH_BACKEND)
         messages.success(self.request, "Bienvenue ! Votre espace recruteur est prêt.")
         return redirect("jobs:recruiter_dashboard")
+
+
+class GoogleSignUpView(View):
+    """Remember the chosen role, then start the Google OAuth flow."""
+
+    def get(self, request, role):
+        if role not in User.Role.values or not settings.GOOGLE_CLIENT_ID:
+            raise Http404
+        if request.user.is_authenticated:
+            return redirect(dashboard_url_for(request.user))
+        request.session[SIGNUP_ROLE_SESSION_KEY] = role
+        return redirect(f"{reverse('google_login')}?process=login")
 
 
 class LoginView(auth_views.LoginView):

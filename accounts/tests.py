@@ -1,10 +1,12 @@
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from core.factories import PASSWORD, make_candidate, make_company, make_offer, make_recruiter, pdf_file
 
+from .adapters import SIGNUP_ROLE_SESSION_KEY, AccountAdapter, SocialAccountAdapter
+from .forms import SocialSignupForm
 from .models import CandidateProfile, Company, CompanyInvitation, RecruiterProfile, User
 
 
@@ -270,3 +272,95 @@ class CandidatePublicProfileTests(TestCase):
         self.assertEqual(self.client.get(url).status_code, 200)
         self.client.login(username="alice", password=PASSWORD)
         self.assertEqual(self.client.get(url).status_code, 403)
+
+
+class GoogleSignUpTests(TestCase):
+    """The Google OAuth round trip is simulated: we test what DevHire adds on top of allauth."""
+
+    def make_request(self, role=None):
+        from django.contrib.auth.models import AnonymousUser
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from django.test import RequestFactory
+
+        request = RequestFactory().get("/")
+        SessionMiddleware(lambda r: None).process_request(request)
+        if role:
+            request.session[SIGNUP_ROLE_SESSION_KEY] = role
+        request.user = AnonymousUser()
+        return request
+
+    def make_sociallogin(self, request):
+        from allauth.socialaccount.models import SocialAccount, SocialLogin
+
+        sociallogin = SocialLogin(user=User(), account=SocialAccount(provider="google", uid="google-1"))
+        SocialAccountAdapter().populate_user(
+            request,
+            sociallogin,
+            {"email": "gaby@test.com", "first_name": "Gaby", "last_name": "Martin", "username": "gaby"},
+        )
+        return sociallogin
+
+    def test_signup_button_view_stores_role(self):
+        response = self.client.get(reverse("accounts:google_signup", args=["recruiter"]))
+        self.assertTrue(response.url.startswith(reverse("google_login")))
+        self.assertEqual(self.client.session[SIGNUP_ROLE_SESSION_KEY], "recruiter")
+        self.assertEqual(self.client.get(reverse("accounts:google_signup", args=["admin"])).status_code, 404)
+
+    @override_settings(GOOGLE_CLIENT_ID="")
+    def test_signup_button_view_disabled_without_credentials(self):
+        self.assertEqual(self.client.get(reverse("accounts:google_signup", args=["candidate"])).status_code, 404)
+
+    def test_logged_in_user_is_sent_to_dashboard(self):
+        make_candidate("alice")
+        self.client.login(username="alice", password=PASSWORD)
+        response = self.client.get(reverse("accounts:google_signup", args=["candidate"]))
+        self.assertRedirects(response, reverse("core:candidate_dashboard"))
+
+    def test_candidate_is_created_automatically(self):
+        request = self.make_request()
+        sociallogin = self.make_sociallogin(request)
+        adapter = SocialAccountAdapter()
+        self.assertEqual(sociallogin.user.role, User.Role.CANDIDATE)
+        self.assertTrue(adapter.is_auto_signup_allowed(request, sociallogin))
+        user = adapter.save_user(request, sociallogin)
+        self.assertTrue(CandidateProfile.objects.filter(user=user).exists())
+        self.assertEqual(user.first_name, "Gaby")
+        self.assertFalse(user.has_usable_password())
+
+    def test_recruiter_completes_form_with_company(self):
+        request = self.make_request(role="recruiter")
+        sociallogin = self.make_sociallogin(request)
+        self.assertFalse(SocialAccountAdapter().is_auto_signup_allowed(request, sociallogin))
+
+        form = SocialSignupForm(
+            data={"email": "gaby@test.com", "username": "gaby", "company_name": "Acme Google"},
+            sociallogin=sociallogin,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        user = form.save(request)
+        profile = RecruiterProfile.objects.get(user=user)
+        self.assertEqual(user.role, User.Role.RECRUITER)
+        self.assertEqual(profile.company.name, "Acme Google")
+        self.assertTrue(profile.is_company_admin)
+        self.assertEqual(Company.objects.count(), 1)
+        self.assertNotIn(SIGNUP_ROLE_SESSION_KEY, request.session)
+
+    def test_company_name_only_asked_to_recruiters(self):
+        request = self.make_request(role="recruiter")
+        recruiter_form = SocialSignupForm(sociallogin=self.make_sociallogin(request))
+        self.assertIn("company_name", recruiter_form.fields)
+        candidate_form = SocialSignupForm(sociallogin=self.make_sociallogin(self.make_request()))
+        self.assertNotIn("company_name", candidate_form.fields)
+        self.assertFalse(
+            SocialSignupForm(
+                data={"email": "x@test.com", "username": "x"}, sociallogin=self.make_sociallogin(request)
+            ).is_valid()
+        )
+
+    def test_login_redirect_by_role(self):
+        request = self.make_request(role="recruiter")
+        request.user = make_recruiter("rec")
+        self.assertEqual(AccountAdapter().get_login_redirect_url(request), reverse("jobs:recruiter_dashboard"))
+        self.assertNotIn(SIGNUP_ROLE_SESSION_KEY, request.session)
+        request.user = make_candidate("cand")
+        self.assertEqual(AccountAdapter().get_login_redirect_url(request), reverse("core:candidate_dashboard"))

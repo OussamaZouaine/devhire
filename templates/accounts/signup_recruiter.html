@@ -9,6 +9,12 @@
         <div class="card-body">
         <div class="text-center"><span class="auth-icon"><i class="bi bi-building"></i></span>
         <h1 class="h3 mb-4">{% translate "Inscription — Recruteur" %}</h1></div>
+        {% if google_login_enabled and not invitation %}
+            {% url 'accounts:google_signup' 'recruiter' as google_url %}{% translate "S'inscrire avec Google" as google_label %}{% include "includes/google_button.html" with url=google_url label=google_label %}
+            <div class="d-flex align-items-center gap-2 my-3 text-muted small">
+                <hr class="flex-grow-1"><span>{% translate "ou" %}</span><hr class="flex-grow-1">
+            </div>
+        {% endif %}
         {% if invitation %}
             <div class="alert alert-info">
                 {% blocktranslate with company=invitation.company.name %}Vous avez été invité(e) à rejoindre l'équipe de recrutement de <strong>{{ company }}</strong>.{% endblocktranslate %}

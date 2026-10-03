@@ -154,6 +154,9 @@ msgid ""
 "Aucune question pour le moment : le test ne sera pas proposé aux candidats."
 msgstr "No questions yet: the test will not be offered to candidates."
 
+msgid "Avec Google"
+msgstr "With Google"
+
 msgid "Bon retour !"
 msgstr "Welcome back!"
 
@@ -314,6 +317,9 @@ msgstr "Conversion"
 msgid "Critères"
 msgstr "Criteria"
 
+msgid "Créer mon compte"
+msgstr "Create my account"
+
 msgid "Créer un compte"
 msgstr "Create an account"
 
@@ -427,6 +433,9 @@ msgstr "Company profile"
 msgid "Filtres avancés"
 msgstr "Advanced filters"
 
+msgid "Finaliser l'inscription"
+msgstr "Complete sign-up"
+
 msgid "Formation"
 msgstr "Education"
 
@@ -493,9 +502,6 @@ msgstr "Until"
 
 msgid "Kanban"
 msgstr "Kanban"
-
-msgid "La connexion Google crée un compte candidat."
-msgstr "Signing in with Google creates a candidate account."
 
 msgid "La date limite de candidature est dépassée."
 msgstr "The application deadline has passed."
@@ -689,6 +695,9 @@ msgstr "Share of applications that reached each stage."
 msgid "Pas encore de compte ?"
 msgstr "No account yet?"
 
+msgid "Pas encore de compte ? Un compte candidat est créé automatiquement."
+msgstr "No account yet? A candidate account is created automatically."
+
 msgid "Pas encore de données."
 msgstr "No data yet."
 
@@ -830,6 +839,9 @@ msgstr "Result"
 
 msgid "S'inscrire"
 msgstr "Sign up"
+
+msgid "S'inscrire avec Google"
+msgstr "Sign up with Google"
 
 msgid "S'inscrire comme candidat"
 msgstr "Sign up as a candidate"
@@ -1021,6 +1033,17 @@ msgstr "Your match"
 
 msgid "Votre compatibilité avec cette offre"
 msgstr "Your match with this job"
+
+msgid ""
+"Votre compte Google est vérifié. Indiquez le nom de votre entreprise pour "
+"créer votre espace recruteur."
+msgstr ""
+"Your Google account is verified. Enter your company name to create your "
+"recruiter space."
+
+msgid ""
+"Votre compte Google est vérifié. Vérifiez vos informations pour terminer."
+msgstr "Your Google account is verified. Check your details to finish."
 
 msgid "Votre entreprise n'a pas encore publié d'offre d'emploi."
 msgstr "Your company hasn't posted any jobs yet."
