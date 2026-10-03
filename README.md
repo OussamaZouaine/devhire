@@ -11,12 +11,13 @@ matching intelligent, pipeline de recrutement, tests techniques, messagerie, sta
   **Chart.js** (statistiques)
 - **Django REST Framework** + JWT + **drf-spectacular** (Swagger)
 - **Celery** + **Redis** (emails, analyse des CV, alertes emploi) — optionnels en développement
-- **django-allauth** (connexion Google), **pypdf** (lecture des CV), **WhiteNoise**
+- **django-allauth** (connexion et inscription Google), **pypdf** (lecture des CV), **WhiteNoise**
+- **Docker** / docker compose, **GitHub Actions** (CI)
 
 ## Fonctionnalités
 
 ### Candidats
-- Inscription / connexion (ou **Google**), mot de passe oublié
+- Inscription / connexion classique ou **avec Google** (compte créé en un clic), mot de passe oublié
 - Profil complet : titre, compétences, CV PDF, **expériences, formations, langues**, taux de complétion
 - **Analyse du CV** : le texte du PDF est extrait et les compétences détectées sont proposées
 - **Score de compatibilité** avec chaque offre (détail : compétences communes / manquantes)
@@ -27,6 +28,7 @@ matching intelligent, pipeline de recrutement, tests techniques, messagerie, sta
 - **Messagerie** avec le recruteur et **notifications** en direct
 
 ### Recruteurs et entreprises
+- Inscription classique ou **avec Google** (le nom de l'entreprise est demandé après Google)
 - **Entreprise** partagée par plusieurs recruteurs : rôles administrateur / recruteur, **invitations par email**
 - Page publique de l'entreprise, fiche entreprise avec logo
 - Offres : compétences requises, télétravail, niveau, salaire, **date limite**
@@ -39,7 +41,7 @@ matching intelligent, pipeline de recrutement, tests techniques, messagerie, sta
 ### Plateforme
 - Page publique **Tendances du marché** (offres par ville, compétences en pénurie, salaires)
 - **API REST** documentée (Swagger), authentification JWT
-- Interface **français / anglais**
+- Interface **français / anglais**, charte graphique moderne (voir plus bas)
 
 ## Le matching (partie algorithmique)
 
@@ -71,13 +73,17 @@ devhire/
 ├── analytics/       # Statistiques recruteur et tendances du marché
 ├── api/             # API REST (DRF + JWT + Swagger)
 ├── core/            # Accueil / recherche, espace candidat, données de démo, traductions
-├── templates/       # Templates (rangés par app)
+├── templates/       # Templates (rangés par app) + socialaccount/ (inscription Google)
 ├── locale/          # Traductions (en)
-├── static/          # CSS
+├── static/          # CSS (charte graphique) et logo
+├── docs/            # Guides (connexion Google)
+├── docker/          # Script de démarrage des conteneurs
 └── media/           # CVs et logos uploadés
 ```
 
-## Installation
+## Installation (sans Docker)
+
+Prérequis : Python 3.12+ et PostgreSQL (installé localement, ou seulement la base via Docker).
 
 ```bash
 python -m venv venv
@@ -111,7 +117,7 @@ la console et les tâches Celery s'exécutent immédiatement (pas besoin de Redi
 | `DATABASE_URL=postgres://user:pass@localhost:5432/devhire` | Base PostgreSQL (obligatoire) |
 | `CELERY_BROKER_URL=redis://localhost:6379/0` | Tâches en arrière-plan (lancer `celery -A config worker` et `celery -A config beat`) |
 | `EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_*` | Envoi réel des emails |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Bouton « Continuer avec Google » — voir [docs/CONNEXION_GOOGLE.md](docs/CONNEXION_GOOGLE.md) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Connexion et inscription avec Google — voir [docs/CONNEXION_GOOGLE.md](docs/CONNEXION_GOOGLE.md) |
 | `HTTPS=True` | Cookies sécurisés, HSTS, redirection HTTPS (production) |
 
 Les alertes emploi peuvent aussi être envoyées à la main : `python manage.py shell -c "from jobs.tasks import send_job_alerts; send_job_alerts()"`.
@@ -131,13 +137,36 @@ variables de Bootstrap : tous les composants suivent la charte. Le logo est `sta
 
 ## Docker
 
-Pile complète (Django + PostgreSQL + Redis + worker Celery + Celery beat) :
+Pile complète en une commande : Django (gunicorn), PostgreSQL, Redis, worker Celery et Celery beat.
+Prérequis : **Docker Desktop démarré** (`docker info` doit répondre).
 
 ```bash
-docker compose up --build
+cp .env.example .env                                   # si ce n'est pas déjà fait (SECRET_KEY, Google...)
+docker compose up --build -d                           # construit l'image et démarre les 5 services
 docker compose exec web python manage.py seed_demo_data
 docker compose exec web python manage.py createsuperuser
 ```
+
+Ouvrez [http://localhost:8000/](http://localhost:8000/). Les migrations sont appliquées automatiquement au démarrage
+du conteneur `web`.
+
+| Service | Rôle | Port |
+|---|---|---|
+| `web` | Django / gunicorn | `8000` |
+| `db` | PostgreSQL 17 (utilisateur, mot de passe et base : `devhire`) | `5433` sur la machine hôte |
+| `redis` | Broker Celery | — |
+| `worker` | Tâches en arrière-plan (emails, analyse des CV) | — |
+| `beat` | Planificateur (alertes emploi chaque jour à 8 h) | — |
+
+```bash
+docker compose up --build -d     # après une modification du code (le code est copié dans l'image)
+docker compose logs -f web       # logs Django — `worker` affiche les emails envoyés
+docker compose down              # arrêter (les données sont conservées)
+docker compose down -v           # arrêter et supprimer les données (base + fichiers uploadés)
+```
+
+Les variables de `.env` (`SECRET_KEY`, `DEBUG`, `GOOGLE_*`...) sont transmises aux conteneurs. La base de données,
+elle, est fixée dans `docker-compose.yml` : le `DATABASE_URL` local de `.env` est ignoré dans Docker.
 
 ## API REST
 
@@ -154,11 +183,25 @@ Principales routes : `offres/` (filtres `q`, `location`, `contract_type`, `remot
 `offres/{id}/match/`, `offres/mine/`, `candidatures/` (postuler, `status`, `withdraw`), `notifications/`, `competences/`,
 `entreprises/`, `moi/`.
 
+## Connexion Google
+
+Les boutons Google apparaissent automatiquement dès que `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` sont renseignés
+dans `.env`.
+
+| Page | Nouvel utilisateur |
+|---|---|
+| Connexion — « Continuer avec Google » | compte **candidat** créé automatiquement |
+| Inscription candidat — « S'inscrire avec Google » | compte **candidat** créé automatiquement |
+| Inscription recruteur — « S'inscrire avec Google » | page « Finaliser l'inscription » (nom de l'entreprise), puis compte **recruteur** administrateur |
+
+Un compte existant avec le même email est relié et connecté. Création des identifiants dans la Google Cloud Console,
+URI de redirection et dépannage : [docs/CONNEXION_GOOGLE.md](docs/CONNEXION_GOOGLE.md).
+
 ## Tests et qualité
 
 ```bash
-python manage.py test                 # 121 tests
-coverage run manage.py test && coverage report   # couverture ≥ 80 % exigée (actuellement 96 %)
+python manage.py test                 # 128 tests
+coverage run manage.py test && coverage report   # couverture ≥ 80 % exigée (actuellement 97 %)
 ruff check . && ruff format --check .
 ```
 
@@ -183,6 +226,7 @@ messages de confirmation) restent en français.
 | URL | Description |
 |-----|-------------|
 | `/` | Recherche d'offres |
+| `/compte/inscription/` | Inscription (classique ou Google, candidat ou recruteur) |
 | `/mes-candidatures/` | Espace candidat |
 | `/offres/mes-offres/` | Offres de l'entreprise (recruteur) |
 | `/candidatures/offre/<id>/` | Pipeline Kanban d'une offre |
