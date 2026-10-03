@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ attempt.quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="quiz-timer alert alert-warning d-flex justify-content-between align-items-center">
+            <span>{{ attempt.quiz.title }}</span>
+            <span>{% translate "Temps restant" %} : <strong id="timer" data-seconds="{{ attempt.seconds_left }}">--:--</strong></span>
+        </div>
+
+        <form method="post" id="quiz-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="fw-medium">{{ forloop.counter }}. {{ field.label|linebreaksbr }}</p>
+                        {% for radio in field %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">{% translate "Soumettre mes réponses" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const timer = document.getElementById("timer");
+    const form = document.getElementById("quiz-form");
+    let remaining = parseInt(timer.dataset.seconds, 10);
+    let submitted = false;
+    form.addEventListener("submit", () => { submitted = true; });
+
+    function tick() {
+        const minutes = String(Math.floor(remaining / 60)).padStart(2, "0");
+        const seconds = String(remaining % 60).padStart(2, "0");
+        timer.textContent = `${minutes}:${seconds}`;
+        if (remaining <= 0) {
+            if (!submitted) { submitted = true; form.submit(); }
+            return;
+        }
+        remaining -= 1;
+        setTimeout(tick, 1000);
+    }
+    tick();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Test technique" %} — {{ job_offer.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'jobs:recruiter_dashboard' %}">{% translate "Mes offres" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'applications:pipeline' job_offer.pk %}">{{ job_offer.title }}</a></li>
+        <li class="breadcrumb-item active">{% translate "Test technique" %}</li>
+    </ol>
+</nav>
+
+<h1 class="h3 mb-1">{% translate "Test technique (QCM)" %}</h1>
+<p class="text-muted">
+    {% translate "Les candidats passent ce test chronométré après avoir postulé. Le score est calculé automatiquement." %}
+    {% if attempt_count %}<br>{% blocktranslate count counter=attempt_count %}{{ counter }} candidat a déjà passé le test.{% plural %}{{ counter }} candidats ont déjà passé le test.{% endblocktranslate %}{% endif %}
+</p>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">{% translate "Paramètres" %}</div>
+            <div class="card-body">{% crispy settings_form %}</div>
+        </div>
+        <div class="card">
+            <div class="card-header">{% translate "Ajouter une question" %}</div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ question_form|crispy }}
+                    <button type="submit" name="add_question" class="btn btn-primary">{% translate "Ajouter" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <h2 class="h5">
+            {% translate "Questions" %}
+            {% if quiz.pk %}
+                {% if quiz.is_ready %}<span class="badge bg-success">{% translate "Actif" %}</span>{% else %}<span class="badge bg-secondary">{% translate "Inactif" %}</span>{% endif %}
+            {% endif %}
+        </h2>
+        {% for question in questions %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between gap-2">
+                        <div class="fw-medium">{{ forloop.counter }}. {{ question.text|linebreaksbr }}</div>
+                        <form method="post" action="{% url 'assessments:delete_question' question.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Supprimer" %}</button>
+                        </form>
+                    </div>
+                    <ul class="list-unstyled small mb-0 mt-2">
+                        {% for choice in question.choices.all %}
+                            <li class="{% if choice.is_correct %}text-success fw-semibold{% endif %}">
+                                {% if choice.is_correct %}<i class="bi bi-check-circle-fill"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %} {{ choice.text }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">{% translate "Aucune question pour le moment : le test ne sera pas proposé aux candidats." %}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

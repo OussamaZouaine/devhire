@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-1">{{ quiz.title }}</h1>
+        <p class="text-muted">{{ application.job_offer.title }} — {{ application.job_offer.company.name }}</p>
+        <div class="card mb-4">
+            <div class="card-body">
+                <ul class="mb-3">
+                    <li>{% blocktranslate count counter=question_count %}{{ counter }} question à choix multiple{% plural %}{{ counter }} questions à choix multiple{% endblocktranslate %}</li>
+                    <li>{% blocktranslate with minutes=quiz.time_limit_minutes %}Durée : {{ minutes }} minutes — le chronomètre démarre dès que vous commencez.{% endblocktranslate %}</li>
+                    <li>{% translate "Une seule tentative. Une soumission hors délai obtient 0 %." %}</li>
+                </ul>
+                {% if quiz.instructions %}<p class="mb-0">{{ quiz.instructions|linebreaksbr }}</p>{% endif %}
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning btn-lg">{% translate "Commencer le test" %}</button>
+            <a href="{% url 'applications:candidate_application_detail' application.pk %}" class="btn btn-link">{% translate "Plus tard" %}</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
