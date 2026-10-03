@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+
+{% block title %}{% translate "Statistiques" %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="h3">{% translate "Statistiques de recrutement" %}</h1>
+        <p class="subtitle">{{ company.name }}</p>
+    </div>
+    <div class="btn-group" role="group" aria-label="{% translate 'Période' %}">
+        {% for period in periods %}
+            <a href="?jours={{ period }}" class="btn btn-sm {% if period == days %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {% blocktranslate %}{{ period }} jours{% endblocktranslate %}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {% with k=kpis %}
+        <div class="col-6 col-lg-3">{% translate "Offres ouvertes" as label %}{% include "includes/stat_card.html" with icon="bi-briefcase" value=k.open_offers %}</div>
+        <div class="col-6 col-lg-3">{% translate "Vues → candidatures" as label %}{% blocktranslate asvar hint with a=k.applications v=k.views %}{{ a }} / {{ v }} vues{% endblocktranslate %}{% include "includes/stat_card.html" with icon="bi-eye" tone="violet" value=k.view_to_application suffix=" %" %}</div>
+        <div class="col-6 col-lg-3">{% translate "Candidatures → embauches" as label %}{% blocktranslate asvar hint with h=k.hired %}{{ h }} embauche(s){% endblocktranslate %}{% include "includes/stat_card.html" with icon="bi-person-check" tone="green" value=k.application_to_hire suffix=" %" %}</div>
+        <div class="col-6 col-lg-3">
+            {% translate "Délai moyen de 1re réponse" as label %}
+            {% blocktranslate asvar hint with m=k.avg_match %}Compatibilité moy. {{ m }} %{% endblocktranslate %}
+            {% if k.avg_response_days is not None %}
+                {% include "includes/stat_card.html" with icon="bi-stopwatch" tone="amber" value=k.avg_response_days suffix=" j" %}
+            {% else %}
+                {% include "includes/stat_card.html" with icon="bi-stopwatch" tone="amber" value="—" %}
+            {% endif %}
+        </div>
+    {% endwith %}
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">{% blocktranslate %}Vues et candidatures — {{ days }} derniers jours{% endblocktranslate %}</div>
+            <div class="card-body"><canvas id="timeline-chart" height="140" role="img" aria-label="{% translate 'Vues et candidatures par jour' %}"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">{% translate "Entonnoir de recrutement" %}</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        {% for stage in funnel %}
+                            <tr>
+                                <td class="small">{{ stage.label }}</td>
+                                <td class="w-50">
+                                    <div class="progress" style="height: 10px;" role="progressbar" aria-valuenow="{{ stage.percent|unlocalize }}" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="width: {{ stage.percent|unlocalize }}%"></div>
+                                    </div>
+                                </td>
+                                <td class="small text-end text-nowrap">{{ stage.count }} <span class="text-muted">({{ stage.percent }} %)</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="small text-muted mt-2 mb-0">{% translate "Part des candidatures ayant atteint chaque étape." %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">{% translate "Performance par offre" %}</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>{% translate "Offre" %}</th>
+                    <th class="text-end">{% translate "Vues" %}</th>
+                    <th class="text-end">{% translate "Candidatures" %}</th>
+                    <th class="text-end">{% translate "Conversion" %}</th>
+                    <th class="text-end">{% translate "Compatibilité moy." %}</th>
+                    <th class="text-end">{% translate "Embauches" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in per_offer %}
+                    <tr>
+                        <td><a href="{% url 'applications:pipeline' offer.pk %}">{{ offer.title }}</a>{% if not offer.is_active %} <span class="badge bg-secondary">{% translate "Inactive" %}</span>{% endif %}</td>
+                        <td class="text-end">{{ offer.view_count }}</td>
+                        <td class="text-end">{{ offer.application_count }}</td>
+                        <td class="text-end">{{ offer.conversion }} %</td>
+                        <td class="text-end">{% if offer.avg_match is not None %}{{ offer.avg_match|floatformat:0 }} %{% else %}—{% endif %}</td>
+                        <td class="text-end">{{ offer.hired_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-muted">{% translate "Aucune offre." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">{% translate "Répartition des candidatures par statut" %}</div>
+    <div class="card-body d-flex flex-wrap gap-3">
+        {% for item in status_breakdown %}
+            <div><span class="badge bg-{{ item.color }}{% if item.color == 'warning' or item.color == 'light' or item.color == 'info' %} text-dark border{% endif %}">{{ item.label }}</span> <strong>{{ item.count }}</strong></div>
+        {% endfor %}
+    </div>
+</div>
+
+{{ timeline|json_script:"timeline-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" crossorigin="anonymous"></script>
+<script>
+(() => {
+    const data = JSON.parse(document.getElementById("timeline-data").textContent);
+    const style = getComputedStyle(document.documentElement);
+    const muted = style.getPropertyValue("--bs-secondary-color").trim() || "#6c757d";
+    const grid = style.getPropertyValue("--bs-border-color-translucent").trim() || "rgba(0,0,0,.1)";
+    new Chart(document.getElementById("timeline-chart"), {
+        type: "line",
+        data: {
+            labels: data.labels,
+            datasets: [
+                {label: "{% translate 'Vues' %}", data: data.views, borderColor: "#4f46e5", backgroundColor: "rgba(79, 70, 229, 0.08)", fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.25},
+                {label: "{% translate 'Candidatures' %}", data: data.applications, borderColor: "#eb6834", backgroundColor: "#eb6834", borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.25},
+            ],
+        },
+        options: {
+            interaction: {mode: "index", intersect: false},
+            plugins: {legend: {position: "top", align: "end", labels: {boxWidth: 12, color: muted}}},
+            scales: {
+                x: {grid: {display: false}, ticks: {color: muted, maxTicksLimit: 10}},
+                y: {beginAtZero: true, grid: {color: grid}, ticks: {color: muted, precision: 0}},
+            },
+        },
+    });
+})();
+</script>
+{% endblock %}

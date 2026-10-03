@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Tendances du marché" %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="h3">{% translate "Tendances du marché" %}</h1>
+        <p class="subtitle">{% translate "Statistiques calculées en temps réel sur les offres ouvertes de la plateforme." %}</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">{% translate "Offres ouvertes" as label %}{% include "includes/stat_card.html" with icon="bi-briefcase" value=totals.open_offers %}</div>
+    <div class="col-6 col-lg-3">{% translate "Entreprises qui recrutent" as label %}{% include "includes/stat_card.html" with icon="bi-buildings" tone="violet" value=totals.companies %}</div>
+    <div class="col-6 col-lg-3">{% translate "Candidats inscrits" as label %}{% include "includes/stat_card.html" with icon="bi-people" tone="green" value=totals.candidates %}</div>
+    <div class="col-6 col-lg-3">{% translate "Candidatures" as label %}{% include "includes/stat_card.html" with icon="bi-send" tone="amber" value=totals.applications %}</div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">{% translate "Offres par ville" %}</div>
+            <div class="card-body"><canvas id="city-chart" height="200" role="img" aria-label="{% translate 'Offres par ville' %}"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">{% translate "Salaire minimum moyen (CDI) par niveau" %}</div>
+            <div class="card-body"><canvas id="salary-chart" height="200" role="img" aria-label="{% translate 'Salaire moyen par niveau' %}"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header">{% translate "Compétences les plus demandées" %}</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% translate "Compétence" %}</th>
+                            <th class="text-end">{% translate "Offres" %}</th>
+                            <th class="text-end">{% translate "Candidats" %}</th>
+                            <th class="text-end" title="{% translate 'Candidats disponibles par offre' %}">{% translate "Candidats / offre" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for skill in top_skills %}
+                            <tr>
+                                <td><a href="{% url 'core:home' %}?skill={{ skill.name|urlencode }}">{{ skill.name }}</a></td>
+                                <td class="text-end">{{ skill.demand }}</td>
+                                <td class="text-end">{{ skill.supply }}</td>
+                                <td class="text-end">
+                                    {{ skill.ratio }}
+                                    {% if skill.ratio < 1 %}<span class="badge bg-warning text-dark ms-1">{% translate "pénurie" %}</span>{% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-muted">{% translate "Pas encore de données." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">{% translate "Types de contrat" %}</div>
+            <ul class="list-group list-group-flush">
+                {% for row in by_contract %}<li class="list-group-item d-flex justify-content-between"><span>{{ row.label }}</span><strong>{{ row.count }}</strong></li>{% endfor %}
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-header">{% translate "Télétravail" %}</div>
+            <ul class="list-group list-group-flush">
+                {% for row in by_remote %}<li class="list-group-item d-flex justify-content-between"><span>{{ row.label }}</span><strong>{{ row.count }}</strong></li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+{{ by_city|json_script:"city-data" }}
+{{ salary_by_level|json_script:"salary-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" crossorigin="anonymous"></script>
+<script>
+(() => {
+    const style = getComputedStyle(document.documentElement);
+    const muted = style.getPropertyValue("--bs-secondary-color").trim() || "#6c757d";
+    const grid = style.getPropertyValue("--bs-border-color-translucent").trim() || "rgba(0,0,0,.1)";
+    const bar = (id, rows, valueKey, suffix) => new Chart(document.getElementById(id), {
+        type: "bar",
+        data: {
+            labels: rows.map((r) => r.label),
+            datasets: [{data: rows.map((r) => r[valueKey]), backgroundColor: "#4f46e5", borderRadius: 4, maxBarThickness: 28}],
+        },
+        options: {
+            indexAxis: "y",
+            plugins: {legend: {display: false}, tooltip: {callbacks: {label: (ctx) => `${ctx.parsed.x.toLocaleString()}${suffix}`}}},
+            scales: {
+                x: {beginAtZero: true, grid: {color: grid}, ticks: {color: muted, precision: 0}},
+                y: {grid: {display: false}, ticks: {color: muted}},
+            },
+        },
+    });
+    bar("city-chart", JSON.parse(document.getElementById("city-data").textContent), "count", " offre(s)");
+    bar("salary-chart", JSON.parse(document.getElementById("salary-data").textContent), "avg", " €");
+})();
+</script>
+{% endblock %}
